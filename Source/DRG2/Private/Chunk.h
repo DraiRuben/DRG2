@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "FastNoiseWrapper.h"
 #include "Chunk.generated.h"
 
 enum class EBlock;
 enum class EDirection;
+class UFastNoiseWrapper;
 class UProceduralMeshComponent;
 
 UCLASS()
@@ -20,12 +20,21 @@ public:
 	// Sets default values for this actor's properties
 	AChunk();
 	UPROPERTY(EditAnywhere, Category = "Chunk")
-	int Size = 32;
+	int SizeX = 32;
+	UPROPERTY(EditAnywhere, Category = "Chunk")
+	int SizeY = 32;
+	UPROPERTY(EditAnywhere, Category = "Chunk")
+	int SizeZ = 64;
+	
+	UPROPERTY(EditAnywhere, Category = "Chunk")
+	float Frequency = 0.03f;
 
 	UPROPERTY(EditAnywhere, Category = "Chunk")
-	int Scale = 1;
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	int Seed = 1337;
+
+	UPROPERTY(EditAnywhere, Category = "Chunk")
+	int Octave = 3;
+
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,7 +42,8 @@ protected:
 
 private:
 	TObjectPtr<UProceduralMeshComponent> Mesh;
-	UFastNoiseWrapper* FastNoise = CreateDefaultSubobject<UFastNoiseWrapper>(TEXT("FastNoise"));
+	UPROPERTY(VisibleDefaultsOnly, Category = "Fast Noise")
+	TObjectPtr<UFastNoiseWrapper> FastNoise;
 	TArray<EBlock> Blocks;
 	TArray<FVector>VertexData;
 	TArray<int> TriangleData;
@@ -57,12 +67,16 @@ private:
 		5,4,1,0,
 		3,2,7,6
 	};
+
 	void GenerateBlocks();
 	void GenerateMesh();
+	UFUNCTION(BlueprintCallable)
+	void GenerateChunk();
 	void ApplyMesh();
 	bool Check(FVector Position) const;
 	void CreateFace(EDirection Direction, FVector Position);
 	TArray<FVector> GetFaceVertices(EDirection Direction, FVector Position) const;
 	FVector GetPositionInDirection(EDirection Direction, FVector Position) const;
+	FVector GetNormal(const EDirection Direction) const;
 	int GetBlockIndex(int X, int Y, int Z) const; 
 };
