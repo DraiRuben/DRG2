@@ -11,8 +11,10 @@ class AChunkWorld : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-
+private:
+	void Generate2DMap();
+	void Generate3DMap();
+	int ChunkCount;	
 
 protected:
 	// Called when the game starts or when spawned
@@ -26,9 +28,17 @@ public:
 	TSubclassOf<AActor> Chunk;
 	UPROPERTY(EditAnywhere, Category="Chunk World")
 	int DrawDistance = 5;
-
-	int ChunkSizeX = 32;
-	int ChunkSizeY = 32;
-	int ChunkSizeZ = 32;
+	UPROPERTY(EditAnywhere, Category = "Chunk World")
+	FIntVector Size = FIntVector(32,32,32);
+	UPROPERTY(EditAnywhere, Category = "ChunkWorld")
+	float Frequency=0.1f;
+	UPROPERTY(EditAnywhere, Category = "ChunkWorld")
+	float Octaves=3;
+	UPROPERTY(EditAnywhere, Category = "ChunkWorld")
+	int Seed = 1337;
+	UPROPERTY(EditAnywhere, Category = "ChunkWorld")
+	TObjectPtr<UMaterialInterface> Material;
+	UPROPERTY(EditAnywhere, Category = "HeightMap")
+	bool Generate3D =false;
 
 };

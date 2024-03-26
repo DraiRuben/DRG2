@@ -22,7 +22,7 @@ AChunk::AChunk()
 // Called when the game starts or when spawned
 void AChunk::BeginPlay()
 {
-	Blocks.SetNum(SizeX * SizeY * SizeZ);
+	Blocks.SetNum(Size.X * Size.Y * Size.Z);
 	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Perlin,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0.5f,1.0f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::Distance);
 
 	Super::BeginPlay();
@@ -34,18 +34,18 @@ void AChunk::BeginPlay()
 void AChunk::GenerateBlocks()
 {
 	const auto Location = GetActorLocation();
-	for (int x = 0; x < SizeX; ++x) 
+	for (int x = 0; x < Size.X; ++x) 
 	{
-		for (int y = 0; y < SizeY; ++y) 
+		for (int y = 0; y < Size.Y; ++y) 
 		{
 			const float Xpos = (x * 100 + Location.X) / 100;
 			const float Ypos = (y * 100 + Location.Y) / 100;
-			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos,Ypos)+1)*SizeZ/2),0,SizeZ);
+			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos,Ypos)+1)*Size.Z/2),0,Size.Z);
 			for (int z = 0; z < Height; z++)
 			{
 				Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
 			}
-			for (int z = Height; z < SizeZ; z++)
+			for (int z = Height; z < Size.Z; z++)
 			{
 				Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
 			}
@@ -55,11 +55,11 @@ void AChunk::GenerateBlocks()
 
 void AChunk::GenerateMesh()
 {
-	for (int x = 0; x < SizeX; x++)
+	for (int x = 0; x < Size.X; x++)
 	{
-		for (int y = 0; y < SizeY; y++)
+		for (int y = 0; y < Size.Y; y++)
 		{
-			for (int z = 0; z < SizeZ; z++)
+			for (int z = 0; z < Size.Z; z++)
 			{
 				if (Blocks[GetBlockIndex(x, y, z)] != EBlock::Air)
 				{
@@ -81,18 +81,31 @@ void AChunk::GenerateMesh()
 void AChunk::GenerateChunk()
 {
 	GenerateBlocks();
+	GenerateHeightMap();
 	GenerateMesh();
 	ApplyMesh();
 }
 
 void AChunk::ApplyMesh()
 {
-	Mesh->CreateMeshSection(0,VertexData,TriangleData,TArray<FVector>(),UVData,TArray<FColor>(),TArray<FProcMeshTangent>(),true); 
+	Mesh->SetMaterial(0,Material);
+	Mesh->CreateMeshSection(0,
+		ChunkData.VertexData,
+		ChunkData.TriangleData,
+		ChunkData.Normals,
+		ChunkData.UVData,
+		ChunkData.Colors,
+		TArray<FProcMeshTangent>(),
+		true); 
+}
+
+void AChunk::GenerateHeightMap()
+{
 }
 
 bool AChunk::Check(FVector Position) const
 {
-	if (Position.X >= SizeX || Position.Y >= SizeY || Position.Z >= SizeZ ||Position.X < 0 || Position.Y < 0 || Position.Z < 0) return true;
+	if (Position.X >= Size.X || Position.Y >= Size.Y || Position.Z >= Size.Z ||Position.X < 0 || Position.Y < 0 || Position.Z < 0) return true;
 
 	return Blocks[GetBlockIndex(Position.X, Position.Y, Position.Z)] == EBlock::Air;
 }
@@ -102,12 +115,12 @@ void AChunk::CreateFace(EDirection Direction, FVector Position)
 	const auto Color = FColor::MakeRandomColor();
 	const auto Normal = GetNormal(Direction);
 
-	VertexData.Append(GetFaceVertices(Direction, Position));
-	TriangleData.Append({ VertexCount + 3, VertexCount + 2, VertexCount, VertexCount + 2, VertexCount + 1, VertexCount });
+	ChunkData.VertexData.Append(GetFaceVertices(Direction, Position));
+	ChunkData.TriangleData.Append({ VertexCount + 3, VertexCount + 2, VertexCount, VertexCount + 2, VertexCount + 1, VertexCount });
 	
-	UVData.Append({ FVector2D(1,1), FVector2D(1,0), FVector2D(0,0), FVector2D(0,1) });
-	/*Normals.Append({ Normal, Normal, Normal, Normal });
-	Colors.Append({ Color, Color, Color, Color });*/
+	ChunkData.UVData.Append({ FVector2D(1,1), FVector2D(1,0), FVector2D(0,0), FVector2D(0,1) });
+	ChunkData.Normals.Append({ Normal, Normal, Normal, Normal });
+	ChunkData.Colors.Append({ Color, Color, Color, Color });
 	VertexCount += 4;
 }
 
@@ -153,5 +166,5 @@ FVector AChunk::GetNormal(const EDirection Direction) const
 
 int AChunk::GetBlockIndex(int X, int Y, int Z) const
 {
-	return Z * SizeX * SizeY + Y * SizeX + X;
+	return Z * Size.X * Size.Y + Y * Size.X + X;
 }

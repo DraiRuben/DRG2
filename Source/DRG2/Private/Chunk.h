@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ChunkMeshData.h"
 #include "Chunk.generated.h"
+
 
 enum class EBlock;
 enum class EDirection;
@@ -19,35 +21,20 @@ class AChunk : public AActor
 public:
 	// Sets default values for this actor's properties
 	AChunk();
-	UPROPERTY(EditAnywhere, Category = "Chunk")
-	int SizeX = 32;
-	UPROPERTY(EditAnywhere, Category = "Chunk")
-	int SizeY = 32;
-	UPROPERTY(EditAnywhere, Category = "Chunk")
-	int SizeZ = 64;
-	
-	UPROPERTY(EditAnywhere, Category = "Chunk")
+	FIntVector Size;
 	float Frequency = 0.03f;
-
-	UPROPERTY(EditAnywhere, Category = "Chunk")
 	int Seed = 1337;
-
-	UPROPERTY(EditAnywhere, Category = "Chunk")
 	int Octave = 3;
-
-
+	bool Generate3D = false;
+	TObjectPtr<UMaterialInterface> Material;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-private:
 	TObjectPtr<UProceduralMeshComponent> Mesh;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Fast Noise")
 	TObjectPtr<UFastNoiseWrapper> FastNoise;
 	TArray<EBlock> Blocks;
-	TArray<FVector>VertexData;
-	TArray<int> TriangleData;
-	TArray<FVector2D> UVData;
+	FChunkData ChunkData;
 	int VertexCount = 0;
 	const FVector BlockVertexData[8] = {
 		FVector(100,100,100),
@@ -67,16 +54,16 @@ private:
 		5,4,1,0,
 		3,2,7,6
 	};
-
-	void GenerateBlocks();
-	void GenerateMesh();
 	UFUNCTION(BlueprintCallable)
-	void GenerateChunk();
-	void ApplyMesh();
-	bool Check(FVector Position) const;
-	void CreateFace(EDirection Direction, FVector Position);
-	TArray<FVector> GetFaceVertices(EDirection Direction, FVector Position) const;
-	FVector GetPositionInDirection(EDirection Direction, FVector Position) const;
-	FVector GetNormal(const EDirection Direction) const;
-	int GetBlockIndex(int X, int Y, int Z) const; 
+	virtual void GenerateChunk();
+	virtual void GenerateBlocks();
+	virtual void GenerateMesh();
+	virtual void ApplyMesh();
+	virtual void GenerateHeightMap();
+	virtual bool Check(FVector Position) const;
+	virtual void CreateFace(EDirection Direction, FVector Position);
+	virtual TArray<FVector> GetFaceVertices(EDirection Direction, FVector Position) const;
+	virtual FVector GetPositionInDirection(EDirection Direction, FVector Position) const;
+	virtual FVector GetNormal(const EDirection Direction) const;
+	virtual int GetBlockIndex(int X, int Y, int Z) const; 
 };
