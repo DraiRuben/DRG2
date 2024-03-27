@@ -8,8 +8,8 @@
 #include "Chunk.generated.h"
 
 
-enum class EBlock;
-enum class EDirection;
+enum class EBlock : uint8;
+enum class EDirection : uint8;
 class UFastNoiseWrapper;
 class UProceduralMeshComponent;
 
@@ -27,6 +27,9 @@ public:
 	int Octave = 3;
 	bool Generate3D = false;
 	TObjectPtr<UMaterialInterface> Material;
+	AChunk* AdjacentChunks[8];
+	UFUNCTION(BlueprintCallable, Category = "Chunk")
+	virtual void ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -55,13 +58,16 @@ protected:
 		3,2,7,6
 	};
 	UFUNCTION(BlueprintCallable)
+	void ClearMesh();
 	virtual void GenerateChunk();
 	virtual void GenerateBlocks();
 	virtual void GenerateMesh();
 	virtual void ApplyMesh();
-	virtual void GenerateHeightMap();
+	virtual void GenerateHeightMap3D();
+	virtual void GenerateHeightMap2D();
 	virtual bool Check(FVector Position) const;
 	virtual void CreateFace(EDirection Direction, FVector Position);
+	virtual void ModifyVoxelData(const FIntVector Position, EBlock Block, const float Radius);
 	virtual TArray<FVector> GetFaceVertices(EDirection Direction, FVector Position) const;
 	virtual FVector GetPositionInDirection(EDirection Direction, FVector Position) const;
 	virtual FVector GetNormal(const EDirection Direction) const;

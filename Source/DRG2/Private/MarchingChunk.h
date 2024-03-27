@@ -19,17 +19,20 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Marching Cubes")
 	bool Interpolation = false;
+	void ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive) override;
 protected:
-	virtual void GenerateHeightMap() override;
+	virtual void GenerateHeightMap3D() override;
+	virtual void GenerateHeightMap2D() override;
 	virtual void GenerateMesh() override;
 	void BeginPlay() override;
+	void ModifyVoxelData(const FIntVector Position, EBlock Block, const float Radius) override;
 private:
 	TArray<float> Voxels;
 	int TriangleOrder[3] = {0,1,2};
 	void March(int X,int Y, int Z, const float Cube[8]);
 	int GetVoxelIndex(int X, int Y, int Z) const;
 	float GetInterpolationOffset(float V1, float V2) const;
-
+	bool RecursiveSetData = false;
 	const int VertexOffset[8][3] = {
 		{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0},
 		{0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChunkWorld.generated.h"
+class AChunk;
 
 UCLASS()
 class AChunkWorld : public AActor
@@ -14,8 +15,13 @@ class AChunkWorld : public AActor
 private:
 	void Generate2DMap();
 	void Generate3DMap();
+	void SetAdjacentChunks();
+	bool IsChunkPosValid(const FIntVector ChunkPos) const;
+	int GetChunkIndex(const int X,const int Y,const int Z) const;
 	int ChunkCount;	
+	TArray<AChunk*> GeneratedChunks;
 
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -42,3 +48,12 @@ public:
 	bool Generate3D =false;
 
 };
+static FIntVector AdjacentOffset[8] =
+	{
+	FIntVector(1,0,0),
+	FIntVector(0,1,0),
+	FIntVector(-1,0,0),
+	FIntVector(0,-1,0),
+	FIntVector(0,0,1),
+	FIntVector(0,0,-1),
+};  

@@ -1,11 +1,25 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "MarchingChunk.h"
 
+#include "ChunkWorld.h"
+#include "Enums.h"
 #include "FastNoiseWrapper.h"
 
-void AMarchingChunk::GenerateHeightMap()
+void AMarchingChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive)
+{
+	if (Position.X -Radius >= Size.X || Position.Y -Radius>= Size.Y|| Position.Z -Radius >= Size.Z 
+		|| Position.X + Radius < 0  || Position.Y+ Radius < 0 || Position.Z + Radius< 0)
+	{
+		UE_LOG(LogTemp,Warning,TEXT("Returned"));
+		return;
+	}
+	RecursiveSetData = Recursive;
+	ModifyVoxelData(Position, Block, Radius);
+	ClearMesh();
+	GenerateMesh();
+	ApplyMesh();
+}
+
+void AMarchingChunk::GenerateHeightMap3D()
 {
 	const auto Position = GetActorLocation()/100;
 	for (int x = 0; x <= Size.X; ++x)
@@ -15,6 +29,31 @@ void AMarchingChunk::GenerateHeightMap()
 			for (int z = 0; z <= Size.Z; ++z)
 			{
 				Voxels[GetVoxelIndex(x,y,z)] = FastNoise->GetNoise3D(x + Position.X, y + Position.Y, z + Position.Z);	
+			}
+		}
+	}
+}
+
+void AMarchingChunk::GenerateHeightMap2D()
+{
+	const auto Position = GetActorLocation()/100;
+	for (int x = 0; x <= Size.X; x++)
+	{
+		for (int y = 0; y <= Size.Y; y++)
+		{
+			const float Xpos = x + Position.X;
+			const float ypos = y + Position.Y;
+			
+			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos, ypos) + 1) * Size.Z / 2), 0, Size.Z);
+
+			for (int z = 0; z < Height; z++)
+			{
+				Voxels[GetVoxelIndex(x,y,z)] = 1.0f;
+			}
+
+			for (int z = Height; z < Size.Z; z++)
+			{
+				Voxels[GetVoxelIndex(x,y,z)] = -1.0f;
 			}
 		}
 	}
@@ -58,6 +97,46 @@ void AMarchingChunk::BeginPlay()
 {
 	Voxels.SetNum((Size.X + 1) * (Size.Y + 1) * (Size.Z + 1));
 	Super::BeginPlay();
+}
+
+void AMarchingChunk::ModifyVoxelData(const FIntVector Position, EBlock Block, const float Radius)
+{
+
+	if(RecursiveSetData)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			const FIntVector OtherLocalChunkPos = Position + AdjacentOffset[i] * Size * -1;
+			if(AdjacentChunks[i] != nullptr)
+			{
+				UE_LOG(LogTemp,Warning,TEXT("%s"),*AdjacentChunks[i]->GetName());
+				AdjacentChunks[i]->ModifyVoxel(OtherLocalChunkPos,Block,Radius,false);
+			}
+			else
+			{
+				UE_LOG(LogTemp,Warning,TEXT("Null ptr at index %d"),i);
+			}
+		}
+	}
+
+	const FVector SphereCenter = (FVector)(Position);
+	// Iterate through each voxel in the grid
+	for (int x = 0; x <= Size.X; ++x)
+	{
+		for (int y = 0; y <= Size.Y; ++y)
+		{
+			for (int z = 0; z <= Size.Z; ++z)
+			{
+				const auto VoxelPos = FVector(x, y, z);
+				const float Distance = FVector::Distance(VoxelPos,SphereCenter);
+
+				if (Distance <= Radius)
+				{
+					Voxels[GetVoxelIndex(x, y, z)] = Block == EBlock::Air?0.0f:1.0f;
+				}
+			}
+		}
+	}
 }
 
 void AMarchingChunk::March(int X, int Y, int Z, const float Cube[8])

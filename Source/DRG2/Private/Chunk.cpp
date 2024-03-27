@@ -19,6 +19,15 @@ AChunk::AChunk()
 	SetRootComponent(Mesh);
 }
 
+void AChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive)
+{
+	if (Position.X >= Size.X || Position.Y >= Size.Y || Position.Z >= Size.Z ||Position.X < 0 || Position.Y < 0 || Position.Z < 0) return;
+	ModifyVoxelData(Position, Block, Radius);
+	ClearMesh();
+	GenerateMesh();
+	ApplyMesh();
+}
+
 // Called when the game starts or when spawned
 void AChunk::BeginPlay()
 {
@@ -78,10 +87,19 @@ void AChunk::GenerateMesh()
 	}
 }
 
+void AChunk::ClearMesh()
+{
+	VertexCount = 0;
+	ChunkData.Clear();
+}
+
 void AChunk::GenerateChunk()
 {
 	GenerateBlocks();
-	GenerateHeightMap();
+	if(Generate3D)
+		GenerateHeightMap3D();
+	else
+		GenerateHeightMap2D();
 	GenerateMesh();
 	ApplyMesh();
 }
@@ -99,7 +117,11 @@ void AChunk::ApplyMesh()
 		true); 
 }
 
-void AChunk::GenerateHeightMap()
+void AChunk::GenerateHeightMap3D()
+{
+}
+
+void AChunk::GenerateHeightMap2D()
 {
 }
 
@@ -124,10 +146,15 @@ void AChunk::CreateFace(EDirection Direction, FVector Position)
 	VertexCount += 4;
 }
 
+void AChunk::ModifyVoxelData(const FIntVector Position, EBlock Block, const float Radius)
+{
+	const int Index = GetBlockIndex(Position.X,Position.Y,Position.Z);
+	Blocks[Index] = Block;
+}
+
 TArray<FVector> AChunk::GetFaceVertices(EDirection Direction, FVector Position) const
 {
 	TArray<FVector> Vertices;
-
 	for (int i = 0; i < 4; i++)
 	{
 		Vertices.Add(BlockVertexData[BlockTriangleData[i + static_cast<int>(Direction) * 4]] + Position);
