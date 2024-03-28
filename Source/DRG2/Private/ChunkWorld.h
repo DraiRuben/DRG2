@@ -16,11 +16,14 @@ private:
 	void Generate2DMap();
 	void Generate3DMap();
 	void SetAdjacentChunks();
+	void MakeChunk(const int X, const int Y, const int Z);
 	bool IsChunkPosValid(const FIntVector ChunkPos) const;
 	int GetChunkIndex(const int X,const int Y,const int Z) const;
-	int ChunkCount;	
+	int ChunkCount;
+	void TryGenerateNewChunks();
+	bool TryExpandMap(const int X, const int Y, const int Z);
 	TArray<AChunk*> GeneratedChunks;
-
+	FTimerHandle CheckTimer;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -33,7 +36,9 @@ public:
 	UPROPERTY(EditAnywhere, Category="Chunk World")
 	TSubclassOf<AActor> Chunk;
 	UPROPERTY(EditAnywhere, Category="Chunk World")
-	int DrawDistance = 5;
+	FIntVector DrawDistance;
+	UPROPERTY(EditAnywhere, Category="Chunk World")
+	FIntVector RenderDistance;
 	UPROPERTY(EditAnywhere, Category = "Chunk World")
 	FIntVector Size = FIntVector(32,32,32);
 	UPROPERTY(EditAnywhere, Category = "ChunkWorld")
@@ -46,6 +51,8 @@ public:
 	TArray<UMaterialInterface*> Materials;
 	UPROPERTY(EditAnywhere, Category = "HeightMap")
 	bool Generate3D =false;
+
+	void Tick(float DeltaSeconds) override;
 
 };
 static FIntVector AdjacentOffset[8] =
