@@ -175,22 +175,22 @@ void AMarchingChunk::March(int X, int Y, int Z, const float Cube[8])
 		auto Normal = FVector::CrossProduct(V2-V1, V3-V1);
 		Normal.Normalize();
 
-		ChunkData.VertexData.Append({V1, V2, V3});
+		ChunkDataPerMat[0].VertexData.Append({V1, V2, V3});
 
-		ChunkData.TriangleData.Append({
+		ChunkDataPerMat[0].TriangleData.Append({
 			VertexCount + TriangleOrder[0],
 			VertexCount + TriangleOrder[1],
 			VertexCount + TriangleOrder[2]
 		});
 
-		ChunkData.Normals.Append({
+		ChunkDataPerMat[0].Normals.Append({
 			Normal,
 			Normal,
 			Normal
 		});
 		const auto Color = FColor::MakeRandomColor();
 
-		ChunkData.Colors.Append({ Color, Color, Color});
+		ChunkDataPerMat[0].Colors.Append({ Color, Color, Color});
 
 		VertexCount+=3;
 	}

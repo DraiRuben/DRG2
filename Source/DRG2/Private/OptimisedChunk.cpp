@@ -90,7 +90,9 @@ void AOptimisedChunk::GenerateMesh()
 
 						DeltaAxis1[Axis1] = width;
 						DeltaAxis2[Axis2] = height;
-						CreateQuad(CurrentMask, AxisMask,
+						int VoxelType = static_cast<int>(CurrentMask.Block)-2;
+						VoxelType = FMath::Clamp(VoxelType,0,Materials.Num());
+						CreateQuad(VoxelType, CurrentMask, AxisMask,width, height,
 							ChunkItr,
 							ChunkItr + DeltaAxis1,
 							ChunkItr + DeltaAxis2,
@@ -120,47 +122,62 @@ void AOptimisedChunk::GenerateMesh()
 	}
 }
 
-void AOptimisedChunk::CreateQuad(FMask Mask,
+void AOptimisedChunk::CreateQuad(
+	const int VoxelType,
+	FMask Mask,
 	FIntVector AxisMask,
+	const int Width,
+	const int Height,
 	FIntVector V1,
 	FIntVector V2,
 	FIntVector V3,
 	FIntVector V4)
 {
 	const auto Normal = FVector(AxisMask * Mask.Normal);
-	ChunkData.VertexData.Append({
+	ChunkDataPerMat[VoxelType].VertexData.Append({
 		FVector(V1) * 100,
 		FVector(V2) * 100,
 		FVector(V3) * 100,
 		FVector(V4) * 100
 	});
 
-	ChunkData.TriangleData.Append({
-		VertexCount,
-		VertexCount + 2 + Mask.Normal,
-		VertexCount + 2 - Mask.Normal,
-		VertexCount + 3,
-		VertexCount + 1 - Mask.Normal,
-		VertexCount + 1 + Mask.Normal
-	});
+	ChunkDataPerMat[VoxelType].TriangleData.Append({
+		VertexCountPerMat[VoxelType],
+		VertexCountPerMat[VoxelType] + 2 + Mask.Normal,
+		VertexCountPerMat[VoxelType] + 2 - Mask.Normal,
+		VertexCountPerMat[VoxelType] + 3,
+		VertexCountPerMat[VoxelType] + 1 - Mask.Normal,
+		VertexCountPerMat[VoxelType] +1 + Mask.Normal});
 
-	ChunkData.UVData.Append({
-		FVector2D(0,0),
-		FVector2D(0,1),
-		FVector2D(1,0),
-		FVector2D(1,1)
-	});
+	if (Normal.X == 1 || Normal.X == -1)
+	{
+		ChunkDataPerMat[VoxelType].UVData.Append({
+			FVector2D(Width, Height),
+			FVector2D(0, Height),
+			FVector2D(Width, 0),
+			FVector2D(0, 0),
+		});
+	}
+	else
+	{
+		ChunkDataPerMat[VoxelType].UVData.Append({
+			FVector2D(Height, Width),
+			FVector2D(Height, 0),
+			FVector2D(0, Width),
+			FVector2D(0, 0),
+		});
+	}
 
-	ChunkData.Normals.Append({
+	ChunkDataPerMat[VoxelType].Normals.Append({
 		Normal,
 		Normal,
 		Normal,
 		Normal
 	});
-	const auto Color = FColor::MakeRandomColor();
-	ChunkData.Colors.Append({ Color, Color, Color, Color });
+	const auto Color = FColor(255, 255, 255, static_cast<int>(Mask.Normal));
+	ChunkDataPerMat[VoxelType].Colors.Append({ Color, Color, Color, Color });
 
-	VertexCount+=4;
+	VertexCountPerMat[VoxelType]+=4;
 }
 
 EBlock AOptimisedChunk::GetBlock(FIntVector Index) const

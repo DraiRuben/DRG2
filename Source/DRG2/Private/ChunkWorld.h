@@ -43,7 +43,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "ChunkWorld")
 	int Seed = 1337;
 	UPROPERTY(EditAnywhere, Category = "ChunkWorld")
-	TObjectPtr<UMaterialInterface> Material;
+	TArray<UMaterialInterface*> Materials;
 	UPROPERTY(EditAnywhere, Category = "HeightMap")
 	bool Generate3D =false;
 

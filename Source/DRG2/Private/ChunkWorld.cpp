@@ -35,7 +35,7 @@ void AChunkWorld::Generate2DMap()
 			chunk->Frequency = Frequency;
 			chunk->Octave = Octaves;
 			chunk->Size = Size;
-			chunk->Material = Material;
+			chunk->Materials = Materials;
 			UGameplayStatics::FinishSpawningActor(chunk, transform);
 			GeneratedChunks.Add(chunk);
 			ChunkCount++;
@@ -69,7 +69,7 @@ void AChunkWorld::Generate3DMap()
 				chunk->Frequency = Frequency;
 				chunk->Octave = Octaves;
 				chunk->Size = Size;
-				chunk->Material = Material;
+				chunk->Materials = Materials;
 				UGameplayStatics::FinishSpawningActor(chunk, transform);
 				GeneratedChunks.Add(chunk);
 				ChunkCount++;

@@ -73,12 +73,13 @@ void AChunk::GenerateMesh()
 				if (Blocks[GetBlockIndex(x, y, z)] != EBlock::Air)
 				{
 					const auto Position = FVector(x, y, z);
-
+					int VoxelType = static_cast<int>(Blocks[GetBlockIndex(x,y,z)])-2;
+					VoxelType = FMath::Clamp(VoxelType,0,Materials.Num()-1);
 					for (auto Direction : { EDirection::Forward, EDirection::Right, EDirection::Back, EDirection::Left, EDirection::Up, EDirection::Down })
 					{
 						if (Check(GetPositionInDirection(Direction, Position)))
 						{
-							CreateFace(Direction, Position * 100);
+							CreateFace(Direction, Position * 100, VoxelType);
 						}
 					}
 				}
@@ -89,33 +90,52 @@ void AChunk::GenerateMesh()
 
 void AChunk::ClearMesh()
 {
-	VertexCount = 0;
-	ChunkData.Clear();
+	VertexCount =0;
+	ChunkDataPerMat.Empty();
+	VertexCountPerMat.Empty();
+	ChunkDataPerMat.SetNum(Materials.Num());
+	VertexCountPerMat.SetNum(Materials.Num());
 }
 
 void AChunk::GenerateChunk()
 {
+	ClearMesh();
 	GenerateBlocks();
+	UE_LOG(LogTemp,Warning,TEXT("GeneratedBlocks"));
 	if(Generate3D)
 		GenerateHeightMap3D();
 	else
 		GenerateHeightMap2D();
 	GenerateMesh();
+	UE_LOG(LogTemp,Warning,TEXT("GeneratedMesh"));
 	ApplyMesh();
+	UE_LOG(LogTemp,Warning,TEXT("Applied Mesh"));
 }
 
 void AChunk::ApplyMesh()
 {
-	Mesh->SetMaterial(0,Material);
-	Mesh->CreateMeshSection(0,
-		ChunkData.VertexData,
-		ChunkData.TriangleData,
-		ChunkData.Normals,
-		ChunkData.UVData,
-		ChunkData.Colors,
-		TArray<FProcMeshTangent>(),
-		true); 
+	Mesh->ClearAllMeshSections();
+	for (int i = 0; i < ChunkDataPerMat.Num(); ++i)
+	{
+		if(ChunkDataPerMat[i].VertexData.Num()>0)
+		{
+			Mesh->CreateMeshSection(i,
+				ChunkDataPerMat[i].VertexData,
+				ChunkDataPerMat[i].TriangleData,
+				ChunkDataPerMat[i].Normals,
+				ChunkDataPerMat[i].UVData,
+				ChunkDataPerMat[i].Colors,
+				TArray<FProcMeshTangent>(),
+				true);
+		}
+	}
+	for (int i = 0; i < Materials.Num(); ++i)
+	{
+		Mesh->SetMaterial(i,Materials[i]);
+	}
+	
 }
+	
 
 void AChunk::GenerateHeightMap3D()
 {
@@ -132,18 +152,28 @@ bool AChunk::Check(FVector Position) const
 	return Blocks[GetBlockIndex(Position.X, Position.Y, Position.Z)] == EBlock::Air;
 }
 
-void AChunk::CreateFace(EDirection Direction, FVector Position)
+void AChunk::CreateFace(EDirection Direction, FVector Position, const int MeshMat)
 {
-	const auto Color = FColor::MakeRandomColor();
+	const auto Color = FColor(255,255,255, static_cast<int>(Direction));
 	const auto Normal = GetNormal(Direction);
 
-	ChunkData.VertexData.Append(GetFaceVertices(Direction, Position));
-	ChunkData.TriangleData.Append({ VertexCount + 3, VertexCount + 2, VertexCount, VertexCount + 2, VertexCount + 1, VertexCount });
+	ChunkDataPerMat[MeshMat].VertexData.Append(GetFaceVertices(Direction, Position));
+	ChunkDataPerMat[MeshMat].TriangleData.Append({
+		VertexCountPerMat[MeshMat] + 3,
+		VertexCountPerMat[MeshMat] + 2,
+		VertexCountPerMat[MeshMat],
+		VertexCountPerMat[MeshMat] + 2,
+		VertexCountPerMat[MeshMat] + 1,
+		VertexCountPerMat[MeshMat] });
 	
-	ChunkData.UVData.Append({ FVector2D(1,1), FVector2D(1,0), FVector2D(0,0), FVector2D(0,1) });
-	ChunkData.Normals.Append({ Normal, Normal, Normal, Normal });
-	ChunkData.Colors.Append({ Color, Color, Color, Color });
-	VertexCount += 4;
+	ChunkDataPerMat[MeshMat].UVData.Append({
+		FVector2D(1,0),
+		FVector2D(0,0),
+		FVector2D(0,1),
+		FVector2D(1,1) });
+	ChunkDataPerMat[MeshMat].Normals.Append({ Normal, Normal, Normal, Normal });
+	ChunkDataPerMat[MeshMat].Colors.Append({ Color, Color, Color, Color });
+	VertexCountPerMat[MeshMat] +=4;
 }
 
 void AChunk::ModifyVoxelData(const FIntVector Position, EBlock Block, const float Radius)
