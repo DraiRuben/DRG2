@@ -44,15 +44,18 @@ void AOptimisedChunk::GenerateMesh()
 					const auto CurrentBlock = GetBlock(ChunkItr);
 					const auto CompareBlock = GetBlock(ChunkItr + AxisMask);
 					
-					const bool CurrentBlockOpaque = CurrentBlock != EBlock::Air;
-					const bool CompareBlockOpaque = !(CompareBlock == EBlock::Air || CompareBlock == EBlock::Leaves);
-					if(CurrentBlockOpaque == CompareBlockOpaque)
+					const bool CurrentBlockEmpty = CurrentBlock == EBlock::Air || CurrentBlock == EBlock::Null;
+					const bool CompareBlockEmpty = CompareBlock == EBlock::Air || CurrentBlock == EBlock::Null;
+					const bool CurrentBlockTransparent = CurrentBlock == EBlock::Leaves;
+					const bool CompareBlockTransparent = CompareBlock == EBlock::Leaves;
+					if((CurrentBlockEmpty && CompareBlockEmpty) ||
+						(!CurrentBlockEmpty && !CurrentBlockTransparent && !CompareBlockEmpty && !CompareBlockTransparent))
 					{
 						Mask[N++] = FMask{EBlock::Null, 0};
-					}else if(CurrentBlockOpaque)
+					}else if(!CurrentBlockEmpty && (CompareBlockTransparent || CompareBlockEmpty))
 					{
 						Mask[N++] = FMask{CurrentBlock, 1};
-					}else 
+					}else
 					{
 						Mask[N++] = FMask{CompareBlock, -1};
 					}
