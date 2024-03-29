@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Enums.h"
 #include "GameFramework/Actor.h"
 #include "ChunkWorld.generated.h"
 class AChunk;
@@ -16,12 +17,10 @@ private:
 	void Generate2DMap();
 	void Generate3DMap();
 	void SetAdjacentChunks();
-	void MakeChunk(const int X, const int Y, const int Z);
 	bool IsChunkPosValid(const FIntVector ChunkPos) const;
 	int GetChunkIndex(const int X,const int Y,const int Z) const;
 	int ChunkCount;
 	void TryGenerateNewChunks();
-	bool TryExpandMap(const int X, const int Y, const int Z);
 	TArray<AChunk*> GeneratedChunks;
 	FTimerHandle CheckTimer;
 	
@@ -33,12 +32,18 @@ public:
 	// Called every frame
 	// Sets default values for this actor's properties
 	AChunkWorld();
+	void MakeChunk(const int X, const int Y, const int Z);
+	AChunk* MakeChunk(FVector Pos);
+	AChunk* GetClosestChunkInDir(EDirection Direction,FVector ChunkPos);
+	
 	UPROPERTY(EditAnywhere, Category="Chunk World")
 	TSubclassOf<AActor> Chunk;
 	UPROPERTY(EditAnywhere, Category="Chunk World")
 	FIntVector DrawDistance;
 	UPROPERTY(EditAnywhere, Category="Chunk World")
 	FIntVector RenderDistance;
+	UPROPERTY(EditAnywhere, Category="Chunk World")
+	FIntVector ChunkSpawnOffset;
 	UPROPERTY(EditAnywhere, Category = "Chunk World")
 	FIntVector Size = FIntVector(32,32,32);
 	UPROPERTY(EditAnywhere, Category = "ChunkWorld")

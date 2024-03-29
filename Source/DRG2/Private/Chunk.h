@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChunkMeshData.h"
+#include "ChunkWorld.h"
 #include "Chunk.generated.h"
 
 
@@ -21,6 +22,7 @@ class AChunk : public AActor
 public:
 	// Sets default values for this actor's properties
 	AChunk();
+	TObjectPtr<AChunkWorld> Spawner;
 	FIntVector Size;
 	float Frequency = 0.03f;
 	int Seed = 1337;
@@ -29,9 +31,12 @@ public:
 	TArray<UMaterialInterface*> Materials;
 	TArray<FChunkData>ChunkDataPerMat;
 	TArray<int> VertexCountPerMat;
-	AChunk* AdjacentChunks[8];
+	FIntVector SpawnOffset;
+	UPROPERTY(EditAnywhere, Category = "Fast Noise")
+	TArray<TObjectPtr<AChunk>> AdjacentChunks;
 	UFUNCTION(BlueprintCallable, Category = "Chunk")
 	virtual void ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive);
+	void TryGenerateAdjacent(const FVector PlayerPos);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

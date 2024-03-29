@@ -2,6 +2,8 @@
 
 
 #include "Chunk.h"
+
+#include "ChunkWorld.h"
 #include "Enums.h"
 #include "FastNoiseWrapper.h"
 #include "ProceduralMeshComponent.h"
@@ -17,6 +19,7 @@ AChunk::AChunk()
 
 	FastNoise = CreateDefaultSubobject<UFastNoiseWrapper>("FastNoiseMaker");
 	SetRootComponent(Mesh);
+	AdjacentChunks.SetNum(8);
 }
 
 void AChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive)
@@ -26,6 +29,28 @@ void AChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const fl
 	ClearMesh();
 	GenerateMesh();
 	ApplyMesh();
+}
+
+void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
+{
+	const auto ChunkPos = GetActorLocation();
+
+	if(FVector::Distance(ChunkPos,PlayerPos)<8000)
+	{
+		for (int i = 0; i < (Generate3D?6:4); i++)
+		{
+			if(AdjacentChunks[i]==nullptr)
+			{
+				const auto NewChunkPos = ChunkPos + static_cast<FVector>(AdjacentOffset[i]*Size*100.0f);
+				AdjacentChunks[i] = Spawner->MakeChunk(NewChunkPos);
+				for (int u = 0; u < (Generate3D?6:4); u++)
+				{
+					AdjacentChunks[i]->AdjacentChunks[u] = Spawner->GetClosestChunkInDir(static_cast<EDirection>(u),NewChunkPos);
+				}
+			}
+		}
+	}
+	
 }
 
 // Called when the game starts or when spawned
@@ -101,15 +126,12 @@ void AChunk::GenerateChunk()
 {
 	ClearMesh();
 	GenerateBlocks();
-	UE_LOG(LogTemp,Warning,TEXT("GeneratedBlocks"));
 	if(Generate3D)
 		GenerateHeightMap3D();
 	else
 		GenerateHeightMap2D();
 	GenerateMesh();
-	UE_LOG(LogTemp,Warning,TEXT("GeneratedMesh"));
 	ApplyMesh();
-	UE_LOG(LogTemp,Warning,TEXT("Applied Mesh"));
 }
 
 void AChunk::ApplyMesh()

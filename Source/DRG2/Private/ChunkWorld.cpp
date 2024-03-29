@@ -92,7 +92,10 @@ void AChunkWorld::MakeChunk(const int X, const int Y, const int Z)
 {
 	auto transform = FTransform(
 				FRotator::ZeroRotator,
-				FVector(X * Size.X * 100, Y * Size.Y * 100, Z* Size.Z),
+				FVector(
+					X * Size.X  * 100 + ChunkSpawnOffset.X *100 * Size.X,
+					Y * Size.Y *100 + ChunkSpawnOffset.Y * 100* Size.Y ,
+					Z* Size.Z *100 + ChunkSpawnOffset.Z*100 * Size.Z),
 				FVector::OneVector
 			);
 
@@ -108,8 +111,105 @@ void AChunkWorld::MakeChunk(const int X, const int Y, const int Z)
 	chunk->Octave = Octaves;
 	chunk->Size = Size;
 	chunk->Materials = Materials;
+	chunk->SpawnOffset = ChunkSpawnOffset;
+	chunk->Spawner = this;
 	UGameplayStatics::FinishSpawningActor(chunk, transform);
 	GeneratedChunks[GetChunkIndex(X,Y,Z)] = chunk;
+}
+
+AChunk* AChunkWorld::MakeChunk(FVector Pos)
+{
+	auto transform = FTransform(
+				FRotator::ZeroRotator,
+				Pos,
+				FVector::OneVector
+			);
+
+	const auto chunk = GetWorld()->SpawnActorDeferred<AChunk>(
+		Chunk,
+		transform,
+		this
+	);
+	
+	chunk->Generate3D = Generate3D;
+	chunk->Seed = Seed;
+	chunk->Frequency = Frequency;
+	chunk->Octave = Octaves;
+	chunk->Size = Size;
+	chunk->Materials = Materials;
+	chunk->SpawnOffset = ChunkSpawnOffset;
+	chunk->Spawner = this;
+	UGameplayStatics::FinishSpawningActor(chunk, transform);
+	GeneratedChunks.Add(chunk);
+	return chunk;
+}
+
+AChunk* AChunkWorld::GetClosestChunkInDir(EDirection Direction,FVector ChunkPos)
+{
+	switch(Direction)
+	{
+	case EDirection::Forward:
+		for (auto chunkP : GeneratedChunks)
+		{
+			auto chunkpP = chunkP->GetActorLocation();
+			if(ChunkPos.Z == chunkpP.Z && ChunkPos.Y == chunkpP.Y && ChunkPos.X<chunkpP.X && chunkpP.X-ChunkPos.X < Size.X*100+5)
+			{
+				return chunkP;
+			}
+		}
+		break;
+	case EDirection::Right:
+		for (auto chunkP : GeneratedChunks)
+		{
+			auto chunkpP = chunkP->GetActorLocation();
+			if(ChunkPos.Z == chunkpP.Z && ChunkPos.X == chunkpP.X && ChunkPos.Y<chunkpP.Y && chunkpP.Y-ChunkPos.Y < Size.Y*100+5)
+			{
+				return chunkP;
+			}
+		}
+		break;
+	case EDirection::Left:
+		for (auto chunkP : GeneratedChunks)
+		{
+			auto chunkpP = chunkP->GetActorLocation();
+			if(ChunkPos.Z == chunkpP.Z && ChunkPos.X == chunkpP.X && ChunkPos.Y>chunkpP.Y && ChunkPos.Y-chunkpP.Y < Size.Y*100+5)
+			{
+				return chunkP;
+			}
+		}
+		break;
+	case EDirection::Back:
+		for (auto chunkP : GeneratedChunks)
+		{
+			auto chunkpP = chunkP->GetActorLocation();
+			if(ChunkPos.Z == chunkpP.Z && ChunkPos.Y == chunkpP.Y && ChunkPos.X>chunkpP.X && ChunkPos.X-chunkpP.X < Size.X*100+5)
+			{
+				return chunkP;
+			}
+		}
+		break;
+	case EDirection::Down:
+		for (auto chunkP : GeneratedChunks)
+		{
+			auto chunkpP = chunkP->GetActorLocation();
+			if(ChunkPos.X == chunkpP.X && ChunkPos.Y == chunkpP.Y && ChunkPos.Z>chunkpP.Z && ChunkPos.Z-chunkpP.Z < Size.Z*100+5)
+			{
+				return chunkP;
+			}
+		}
+		break;
+	case EDirection::Up:
+		for (auto chunkP : GeneratedChunks)
+		{
+			auto chunkpP = chunkP->GetActorLocation();
+			if(ChunkPos.X == chunkpP.X && ChunkPos.Y == chunkpP.Y && ChunkPos.Z<chunkpP.Z && chunkpP.Z-ChunkPos.Z< Size.Z*100+5)
+			{
+				return chunkP;
+			}
+		}
+		break;
+	}
+	return nullptr;
 }
 
 bool AChunkWorld::IsChunkPosValid(const FIntVector ChunkPos) const
@@ -137,116 +237,12 @@ int AChunkWorld::GetChunkIndex(const int X, const int Y, const int Z) const
 void AChunkWorld::TryGenerateNewChunks()
 {
 	bool Generated = false;
-	for (int x = 0; x < DrawDistance.X; x++)
+	const auto PlayerPos = UGameplayStatics::GetPlayerCharacter(GetWorld(),0)->GetActorLocation();
+	for(int i =0;i<GeneratedChunks.Num();i++)
 	{
-		for (int y = 0; y < DrawDistance.Y; y++)
-		{
-			if(Generate3D)
-			{
-				
-				for (int z = 0; z < DrawDistance.Z; z++)
-				{
-					if(x!= 0 && x!=DrawDistance.X-1
-					&& y!=0 && y!= DrawDistance.Y-1
-					&& z!= 0 && z!= DrawDistance.Z-1) continue;
-					Generated = TryExpandMap(x,y,z)?true:Generated;
-					
-				}
-				continue;
-			}
-			if(x!= 0 && x!=DrawDistance.X-1 && y!=0 && y!= DrawDistance.Y-1) continue;
-
-			Generated = TryExpandMap(x,y,0)?true:Generated;
-		}
-	}
-	if(Generated)
-	{
-		SetAdjacentChunks();
-
-
-	}
+		GeneratedChunks[i]->TryGenerateAdjacent(PlayerPos);
+	}	
 }
-
-bool AChunkWorld::TryExpandMap(const int X, const int Y, const int Z)
-{
-	const auto Player = UGameplayStatics::GetPlayerCharacter(GetWorld(),0);
-	const auto PlayerPos = Player->GetActorLocation();
-	if(GeneratedChunks[GetChunkIndex(X,Y,Z)]== nullptr) return false;
-	
-	const auto ChunkPos = GeneratedChunks[GetChunkIndex(X,Y,Z)]->GetActorLocation();
-	if(FMath::Abs(ChunkPos.X-PlayerPos.X)<RenderDistance.X*100*Size.X
-		||FMath::Abs(ChunkPos.Y-PlayerPos.Y)<RenderDistance.Y*100*Size.Y
-		||FMath::Abs(ChunkPos.Z-PlayerPos.Z)<RenderDistance.Z*100*Size.Z)
-	{
-
-		int OffsetX = 0;
-		int OffsetY = 0;
-		int OffsetZ = 0;
-		
-		int StartX = 0;
-		int StartY = 0;
-		int StartZ = 0;
-		
-		int EndX = 0;
-		int EndY = 0;
-		int EndZ = 0;
-		if(FMath::Abs(ChunkPos.X-PlayerPos.X)<RenderDistance.X*100*Size.X)
-		{
-			OffsetX = ChunkPos.X>PlayerPos.X?1:-1;
-			StartX = X;
-			EndX = X+1;
-			StartY = 0;
-			EndY = DrawDistance.Y;
-			StartZ = 0;
-			EndZ = DrawDistance.Z;
-			DrawDistance.X++;
-		}
-		else if(FMath::Abs(ChunkPos.Y-PlayerPos.Y)<RenderDistance.Y*100*Size.Y)
-		{
-			OffsetY = ChunkPos.Y>PlayerPos.Y?1:-1;
-			StartX = X;
-			EndX = X+1;
-			StartY=Y;
-			EndY = Y+1;
-			StartZ = 0;
-			EndZ = DrawDistance.Z;
-			DrawDistance.Y++;
-		}
-		else if(FMath::Abs(ChunkPos.Z-PlayerPos.Z)<RenderDistance.Z*100*Size.Z)
-		{
-			OffsetZ = ChunkPos.Z>PlayerPos.Z?1:-1;
-			StartX = X;
-			EndX = X+1;
-			StartY=Y;
-			EndY = Y+1;
-			StartZ = Z;
-			EndZ = DrawDistance.Z;
-			DrawDistance.Z++;
-		}
-				
- 		if(GeneratedChunks[GetChunkIndex(X+OffsetX,Y+OffsetY,Z+OffsetZ)]==nullptr)
-		{
-			MakeChunk(X+OffsetX,Y+OffsetY,Z+OffsetZ);
- 			UE_LOG(LogTemp, Warning, TEXT("BEUTE"));
-			return true;
-		}
-		for (int Xbis = StartX; Xbis < EndX; Xbis++)
-		{
-			for (int Ybis = StartY; Ybis < EndY; Ybis++)
-			{
-				for (int Zbis = StartZ; Zbis < EndZ; Zbis++)
-				{
-					GeneratedChunks.Insert(nullptr,GetChunkIndex(Xbis,Ybis,Zbis));
-				}
-			}
-		}
-			
-		MakeChunk(X+OffsetX,Y+OffsetY,Z+OffsetZ);
-		return true;
-	}
-	return false;
-}
-
 
 // Called when the game starts or when spawned
 void AChunkWorld::BeginPlay()
