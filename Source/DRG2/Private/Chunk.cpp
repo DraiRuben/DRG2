@@ -15,7 +15,7 @@ AChunk::AChunk()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>("Mesh");
-	Mesh->SetCastShadow(false);
+	
 
 	FastNoise = CreateDefaultSubobject<UFastNoiseWrapper>("FastNoiseMaker");
 	SetRootComponent(Mesh);
@@ -61,7 +61,7 @@ void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
 void AChunk::BeginPlay()
 {
 	Blocks.SetNum(Size.X * Size.Y * Size.Z);
-	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Perlin,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0.5f,1.0f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::Distance);
+	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Cubic,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0.5f,1.0f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::Distance);
 
 	Super::BeginPlay();
 	
@@ -71,6 +71,8 @@ void AChunk::BeginPlay()
 
 void AChunk::GenerateBlocks()
 {
+	TArray<FIntVector> TrunkPositions;
+	FRandomStream Stream = FRandomStream(Seed);
 	const auto Location = GetActorLocation();
 	for (int x = 0; x < Size.X; ++x) 
 	{
@@ -79,20 +81,62 @@ void AChunk::GenerateBlocks()
 			const float Xpos = (x * 100 + Location.X) / 100;
 			const float Ypos = (y * 100 + Location.Y) / 100;
 			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos,Ypos)+1)*Size.Z/2),0,Size.Z);
-			for (int z = 0; z < Height; z++)
+			for (int z = 0; z < Size.Z; z++)
 			{
-				Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
+				if (z < Height - 3) Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
+				else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
+				else if (z == Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Grass;
+				else if(z == Height && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
+				else Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
 			}
-			for (int z = Height; z < Size.Z; z++)
+		}
+	}
+	GenerateTrees(TrunkPositions);
+}
+
+void AChunk::GenerateTrees(TArray<FIntVector> TrunkPositions)
+{
+	FRandomStream Stream = FRandomStream(Seed);
+	for(auto Trunk : TrunkPositions)
+	{
+		int TreeHeight = Stream.RandRange(3,6);
+		int RandX = Stream.RandRange(0,2);
+		int RandY = Stream.RandRange(0,2);
+		int RandZ = Stream.RandRange(0,2);
+
+		for(int treeX = -2;treeX<3;treeX++)
+		{
+			for (int treeY = -2; treeY < 3; treeY++)
 			{
-				Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
+				for (int treeZ = -2; treeZ < 3; treeZ++)
+				{
+					if(treeX + Trunk.X>=0 && treeX + Trunk.X<Size.X
+						&&treeY + Trunk.Y>=0 && treeY + Trunk.Y<Size.Y
+						&&treeZ + Trunk.Z>=0 && treeZ + Trunk.Z<Size.Z)
+					{
+						float radius = FVector(treeX* RandX, treeY*RandY, treeZ*RandZ).Size();
+
+						if(radius<=2.8f)
+						{
+							if(Stream.FRand()<0.5f || radius <=1.2f)
+							{
+								Blocks[GetBlockIndex(Trunk.X+ treeX,Trunk.Y+treeY,Trunk.Z+treeZ+ TreeHeight)] = EBlock::Leaves;
+							}
+						}
+					}
+				}
 			}
+		}
+		for (int i = 0; i < TreeHeight; i++)
+		{
+			Blocks[GetBlockIndex(Trunk.X,Trunk.Y,Trunk.Z+ i)] = EBlock::Trunk;
 		}
 	}
 }
 
 void AChunk::GenerateMesh()
 {
+	
 	for (int x = 0; x < Size.X; x++)
 	{
 		for (int y = 0; y < Size.Y; y++)
@@ -106,7 +150,7 @@ void AChunk::GenerateMesh()
 					VoxelType = FMath::Clamp(VoxelType,0,Materials.Num()-1);
 					for (auto Direction : { EDirection::Forward, EDirection::Right, EDirection::Back, EDirection::Left, EDirection::Up, EDirection::Down })
 					{
-						if (Check(GetPositionInDirection(Direction, Position)))
+						if (VoxelType == static_cast<int>(EBlock::Trunk)-2 || Check(GetPositionInDirection(Direction, Position)))
 						{
 							CreateFace(Direction, Position * 100, VoxelType);
 						}
@@ -129,7 +173,6 @@ void AChunk::ClearMesh()
 void AChunk::GenerateChunk()
 {
 	ClearMesh();
-	GenerateBlocks();
 	if(Generate3D)
 		GenerateHeightMap3D();
 	else
@@ -165,10 +208,12 @@ void AChunk::ApplyMesh()
 
 void AChunk::GenerateHeightMap3D()
 {
+	GenerateBlocks();
 }
 
 void AChunk::GenerateHeightMap2D()
 {
+	GenerateBlocks();
 }
 
 bool AChunk::Check(FVector Position) const
@@ -221,8 +266,11 @@ void AChunk::ModifyVoxelData(const FIntVector Position, EBlock Block, const floa
 		}
 	}
 	const int Index = GetBlockIndex(Position.X,Position.Y,Position.Z);
-	if(Index >=0)
-		Blocks[Index] = Block;
+	if (Position.X >= Size.X || Position.Y >= Size.Y || Position.Z >= Size.Z ||Position.X < 0 || Position.Y < 0 || Position.Z < 0)
+	{
+		return;
+	}
+	Blocks[Index] = Block;	
 }
 
 TArray<FVector> AChunk::GetFaceVertices(EDirection Direction, FVector Position) const

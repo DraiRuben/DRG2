@@ -29,7 +29,7 @@ void AOptimisedChunk::GenerateMesh()
 
 		auto ChunkItr = FIntVector::ZeroValue;
 		auto AxisMask = FIntVector::ZeroValue;
-
+		
 		AxisMask[Axis] = 1;
 		TArray<FMask> Mask;
 		Mask.SetNum(Axis1Limit * Axis2Limit);
@@ -45,14 +45,14 @@ void AOptimisedChunk::GenerateMesh()
 					const auto CompareBlock = GetBlock(ChunkItr + AxisMask);
 					
 					const bool CurrentBlockOpaque = CurrentBlock != EBlock::Air;
-					const bool CompareBlockOpaque = CompareBlock != EBlock::Air;
+					const bool CompareBlockOpaque = !(CompareBlock == EBlock::Air || CompareBlock == EBlock::Leaves);
 					if(CurrentBlockOpaque == CompareBlockOpaque)
 					{
 						Mask[N++] = FMask{EBlock::Null, 0};
 					}else if(CurrentBlockOpaque)
 					{
 						Mask[N++] = FMask{CurrentBlock, 1};
-					}else
+					}else 
 					{
 						Mask[N++] = FMask{CompareBlock, -1};
 					}
@@ -190,6 +190,8 @@ EBlock AOptimisedChunk::GetBlock(FIntVector Index) const
 }
 void AOptimisedChunk::GenerateHeightMap2D()
 {
+	TArray<FIntVector> TrunkPositions;
+	FRandomStream Stream = FRandomStream(Seed);
 	const FVector Position = GetActorLocation()/100;
 	for (int x = 0; x < Size.X; x++)
 	{
@@ -205,10 +207,12 @@ void AOptimisedChunk::GenerateHeightMap2D()
 				if (z < Height - 3) Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
 				else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
 				else if (z == Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Grass;
+				else if(z == Height && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
 				else Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
 			}
 		}
 	}
+	GenerateTrees(TrunkPositions);
 }
 
 void AOptimisedChunk::GenerateHeightMap3D()

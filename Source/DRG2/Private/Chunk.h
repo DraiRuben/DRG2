@@ -68,6 +68,7 @@ protected:
 	void ClearMesh();
 	virtual void GenerateChunk();
 	virtual void GenerateBlocks();
+	virtual void GenerateTrees(TArray<FIntVector> TrunkPositions);
 	virtual void GenerateMesh();
 	virtual void ApplyMesh();
 	virtual void GenerateHeightMap3D();
