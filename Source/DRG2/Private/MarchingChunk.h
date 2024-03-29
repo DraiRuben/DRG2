@@ -32,7 +32,6 @@ private:
 	void March(int X,int Y, int Z, const float Cube[8]);
 	int GetVoxelIndex(int X, int Y, int Z) const;
 	float GetInterpolationOffset(float V1, float V2) const;
-	bool RecursiveSetData = false;
 	const int VertexOffset[8][3] = {
 		{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0},
 		{0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}

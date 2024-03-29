@@ -28,6 +28,7 @@ public:
 	int Seed = 1337;
 	int Octave = 3;
 	bool Generate3D = false;
+	bool RecursiveSetData = false;
 	TArray<UMaterialInterface*> Materials;
 	TArray<FChunkData>ChunkDataPerMat;
 	TArray<int> VertexCountPerMat;

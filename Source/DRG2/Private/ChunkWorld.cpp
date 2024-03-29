@@ -13,12 +13,6 @@ AChunkWorld::AChunkWorld()
 	ChunkCount = 0;
 }
 
-void AChunkWorld::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-	
-}
-
 void AChunkWorld::Generate2DMap()
 {
 	for (int x = 0; x < DrawDistance.X; x++)
@@ -228,10 +222,8 @@ bool AChunkWorld::IsChunkPosValid(const FIntVector ChunkPos) const
 
 int AChunkWorld::GetChunkIndex(const int X, const int Y, const int Z) const
 {
-	if(Generate3D)
-		return Z  + Y*DrawDistance.Y+ X*DrawDistance.Y*DrawDistance.X;
-	else
-		return Y+ X*DrawDistance.X;
+	return Z*DrawDistance.X *DrawDistance.Y + Y*DrawDistance.X+ X;
+	
 }
 
 void AChunkWorld::TryGenerateNewChunks()
@@ -241,7 +233,7 @@ void AChunkWorld::TryGenerateNewChunks()
 	for(int i =0;i<GeneratedChunks.Num();i++)
 	{
 		GeneratedChunks[i]->TryGenerateAdjacent(PlayerPos);
-	}	
+	}
 }
 
 // Called when the game starts or when spawned

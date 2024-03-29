@@ -24,7 +24,11 @@ AChunk::AChunk()
 
 void AChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive)
 {
-	if (Position.X >= Size.X || Position.Y >= Size.Y || Position.Z >= Size.Z ||Position.X < 0 || Position.Y < 0 || Position.Z < 0) return;
+	if (Position.X > Size.X || Position.Y > Size.Y || Position.Z > Size.Z ||Position.X < -1 || Position.Y < -1 || Position.Z < -1)
+	{
+		return;
+	}
+	RecursiveSetData = Recursive;
 	ModifyVoxelData(Position, Block, Radius);
 	ClearMesh();
 	GenerateMesh();
@@ -35,7 +39,7 @@ void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
 {
 	const auto ChunkPos = GetActorLocation();
 
-	if(FVector::Distance(ChunkPos,PlayerPos)<8000)
+  	if(FVector::Distance(ChunkPos,PlayerPos)<8000)
 	{
 		for (int i = 0; i < (Generate3D?6:4); i++)
 		{
@@ -200,8 +204,25 @@ void AChunk::CreateFace(EDirection Direction, FVector Position, const int MeshMa
 
 void AChunk::ModifyVoxelData(const FIntVector Position, EBlock Block, const float Radius)
 {
+	if(RecursiveSetData)
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			const FIntVector OtherLocalChunkPos = Position + AdjacentOffset[i] * Size*-1 ;
+			if(AdjacentChunks[i] != nullptr)
+			{
+				UE_LOG(LogTemp,Warning,TEXT("%s"),*AdjacentChunks[i]->GetName());
+				AdjacentChunks[i]->ModifyVoxel(OtherLocalChunkPos,Block,Radius,false);
+			}
+			else
+			{
+				UE_LOG(LogTemp,Warning,TEXT("Null ptr at index %d"),i);
+			}
+		}
+	}
 	const int Index = GetBlockIndex(Position.X,Position.Y,Position.Z);
-	Blocks[Index] = Block;
+	if(Index >=0)
+		Blocks[Index] = Block;
 }
 
 TArray<FVector> AChunk::GetFaceVertices(EDirection Direction, FVector Position) const

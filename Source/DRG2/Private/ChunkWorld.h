@@ -56,9 +56,6 @@ public:
 	TArray<UMaterialInterface*> Materials;
 	UPROPERTY(EditAnywhere, Category = "HeightMap")
 	bool Generate3D =false;
-
-	void Tick(float DeltaSeconds) override;
-
 };
 static FIntVector AdjacentOffset[8] =
 	{
