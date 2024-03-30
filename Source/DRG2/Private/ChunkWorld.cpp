@@ -47,7 +47,7 @@ void AChunkWorld::SetAdjacentChunks()
 	{
 		for (int y = 0; y < DrawDistance.Y; y++)
 		{
-			if(Generate3D)
+			if(GenType != EGenerationType::Gen2D)
 			{
 				for (int z = 0; z < DrawDistance.Z; z++)
 				{
@@ -99,12 +99,13 @@ void AChunkWorld::MakeChunk(const int X, const int Y, const int Z)
 		this
 	);
 	
-	chunk->Generate3D = Generate3D;
+	chunk->GenType = GenType;
 	chunk->Seed = Seed;
 	chunk->Frequency = Frequency;
 	chunk->Octave = Octaves;
 	chunk->Size = Size;
 	chunk->Materials = Materials;
+	chunk->ZOffset = ZOffset;
 	chunk->SpawnOffset = ChunkSpawnOffset;
 	chunk->Spawner = this;
 	UGameplayStatics::FinishSpawningActor(chunk, transform);
@@ -125,13 +126,14 @@ AChunk* AChunkWorld::MakeChunk(FVector Pos)
 		this
 	);
 	
-	chunk->Generate3D = Generate3D;
+	chunk->GenType = GenType;
 	chunk->Seed = Seed;
 	chunk->Frequency = Frequency;
 	chunk->Octave = Octaves;
 	chunk->Size = Size;
 	chunk->Materials = Materials;
 	chunk->SpawnOffset = ChunkSpawnOffset;
+	chunk->ZOffset = ZOffset;
 	chunk->Spawner = this;
 	UGameplayStatics::FinishSpawningActor(chunk, transform);
 	GeneratedChunks.Add(chunk);
@@ -213,7 +215,7 @@ bool AChunkWorld::IsChunkPosValid(const FIntVector ChunkPos) const
 		return false;
 	}
 
-	if(ChunkPos.X>=DrawDistance.X || ChunkPos.Y>=DrawDistance.Y || ChunkPos.Z >=DrawDistance.Z || (ChunkPos.Z!=0 && !Generate3D))
+	if(ChunkPos.X>=DrawDistance.X || ChunkPos.Y>=DrawDistance.Y || ChunkPos.Z >=DrawDistance.Z || (ChunkPos.Z!=0 && GenType == EGenerationType::Gen2D))
 	{
 		return false;
 	}
@@ -242,12 +244,17 @@ void AChunkWorld::BeginPlay()
 	Super::BeginPlay();
 	GeneratedChunks.SetNum(DrawDistance.X*DrawDistance.Y*DrawDistance.Z);
 	GetWorldTimerManager().SetTimer(CheckTimer,this,&AChunkWorld::TryGenerateNewChunks,1.0f,true,7);
-	if(Generate3D)
+	switch(GenType)
 	{
-		Generate3DMap();
-	}else
-	{
+	case EGenerationType::Gen2D:
 		Generate2DMap();
+		break;
+	case EGenerationType::Gen3D:
+		Generate3DMap();
+		break;
+	case EGenerationType::GenComplete:
+		Generate3DMap();
+		break;
 	}
 	SetAdjacentChunks();
 }

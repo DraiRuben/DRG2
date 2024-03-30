@@ -1,5 +1,4 @@
 ﻿#include "OptimisedChunk.h"
-
 #include "Enums.h"
 #include "FastNoiseWrapper.h"
 
@@ -191,57 +190,7 @@ EBlock AOptimisedChunk::GetBlock(FIntVector Index) const
 	}
 	return Blocks[GetBlockIndex(Index.X,Index.Y,Index.Z)];
 }
-void AOptimisedChunk::GenerateHeightMap2D()
-{
-	TArray<FIntVector> TrunkPositions;
-	FRandomStream Stream = FRandomStream(Seed);
-	const FVector Position = GetActorLocation()/100;
-	for (int x = 0; x < Size.X; x++)
-	{
-		for (int y = 0; y < Size.Y; y++)
-		{
-			const float Xpos = x + Position.X;
-			const float Ypos = y + Position.Y;
 
-			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos, Ypos) + 1) * Size.Z / 2), 0, Size.Z);
-
-			for (int z = 0; z < Size.Z; z++)
-			{
-				if (z < Height - 3) Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
-				else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
-				else if (z == Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Grass;
-				else if(z == Height && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
-				else Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
-			}
-		}
-	}
-	GenerateTrees(TrunkPositions);
-}
-
-void AOptimisedChunk::GenerateHeightMap3D()
-{
-	const FVector Position = GetActorLocation()/100;
-	for (int x = 0; x < Size.X; ++x)
-	{
-		for (int y = 0; y < Size.Y; ++y)
-		{
-			for (int z = 0; z < Size.Z; ++z)
-			{
-				const auto NoiseValue = FastNoise->GetNoise3D(x + Position.X, y + Position.Y, z + Position.Z);
-
-				if (NoiseValue >= 0)
-				{
-					Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
-				}
-				else
-				{
-					Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
-				}
-			}
-		}
-	}
-	
-}
 
 bool AOptimisedChunk::CompareMask(FMask M1, FMask M2) const
 {

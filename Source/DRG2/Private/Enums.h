@@ -11,3 +11,9 @@ enum class EBlock : uint8
 {
 	Null, Air, Stone, Dirt, Grass, Trunk, Leaves
 };
+
+UENUM(BlueprintType)
+enum class EGenerationType:uint8
+{
+	Gen2D, Gen3D, GenComplete
+};

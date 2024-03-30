@@ -16,9 +16,9 @@ AChunk::AChunk()
 	PrimaryActorTick.bCanEverTick = false;
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>("Mesh");
 	
-
 	FastNoise = CreateDefaultSubobject<UFastNoiseWrapper>("FastNoiseMaker");
 	SetRootComponent(Mesh);
+
 	AdjacentChunks.SetNum(8);
 }
 
@@ -41,13 +41,13 @@ void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
 
   	if(FVector::Distance(ChunkPos,PlayerPos)<8000)
 	{
-		for (int i = 0; i < (Generate3D?6:4); i++)
+		for (int i = 0; i < (GenType != EGenerationType::Gen2D?6:4); i++)
 		{
 			if(AdjacentChunks[i]==nullptr)
 			{
 				const auto NewChunkPos = ChunkPos + static_cast<FVector>(AdjacentOffset[i]*Size*100.0f);
 				AdjacentChunks[i] = Spawner->MakeChunk(NewChunkPos);
-				for (int u = 0; u < (Generate3D?6:4); u++)
+				for (int u = 0; u < (GenType != EGenerationType::Gen2D?6:4); u++)
 				{
 					AdjacentChunks[i]->AdjacentChunks[u] = Spawner->GetClosestChunkInDir(static_cast<EDirection>(u),NewChunkPos);
 				}
@@ -61,37 +61,11 @@ void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
 void AChunk::BeginPlay()
 {
 	Blocks.SetNum(Size.X * Size.Y * Size.Z);
-	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Cubic,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0.5f,1.0f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::Distance);
+	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Cubic,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0.5f,1.0f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::CellValue);
 
 	Super::BeginPlay();
 	
 	GenerateChunk();
-}
-
-
-void AChunk::GenerateBlocks()
-{
-	TArray<FIntVector> TrunkPositions;
-	FRandomStream Stream = FRandomStream(Seed);
-	const auto Location = GetActorLocation();
-	for (int x = 0; x < Size.X; ++x) 
-	{
-		for (int y = 0; y < Size.Y; ++y) 
-		{
-			const float Xpos = (x * 100 + Location.X) / 100;
-			const float Ypos = (y * 100 + Location.Y) / 100;
-			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos,Ypos)+1)*Size.Z/2),0,Size.Z);
-			for (int z = 0; z < Size.Z; z++)
-			{
-				if (z < Height - 3) Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
-				else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
-				else if (z == Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Grass;
-				else if(z == Height && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
-				else Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
-			}
-		}
-	}
-	GenerateTrees(TrunkPositions);
 }
 
 void AChunk::GenerateTrees(TArray<FIntVector> TrunkPositions)
@@ -173,10 +147,18 @@ void AChunk::ClearMesh()
 void AChunk::GenerateChunk()
 {
 	ClearMesh();
-	if(Generate3D)
-		GenerateHeightMap3D();
-	else
+	switch(GenType)
+	{
+	case EGenerationType::Gen2D:
 		GenerateHeightMap2D();
+		break;
+	case EGenerationType::Gen3D:
+		GenerateHeightMap3D();
+		break;
+	case EGenerationType::GenComplete:
+		GenerateCompleteMap();
+		break;
+	}
 	GenerateMesh();
 	ApplyMesh();
 }
@@ -208,12 +190,88 @@ void AChunk::ApplyMesh()
 
 void AChunk::GenerateHeightMap3D()
 {
-	GenerateBlocks();
+	const FVector Position = GetActorLocation()/100;
+	for (int x = 0; x < Size.X; ++x)
+	{
+		for (int y = 0; y < Size.Y; ++y)
+		{
+			for (int z = 0; z < Size.Z; ++z)
+			{
+				const auto NoiseValue = FastNoise->GetNoise3D(x + Position.X, y + Position.Y, z + Position.Z);
+
+				if (NoiseValue >= 0)
+				{
+					Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
+				}
+				else
+				{
+					Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
+				}
+			}
+		}
+	}
 }
 
 void AChunk::GenerateHeightMap2D()
 {
-	GenerateBlocks();
+	TArray<FIntVector> TrunkPositions;
+	FRandomStream Stream = FRandomStream(Seed);
+	const auto Location = GetActorLocation();
+	for (int x = 0; x < Size.X; ++x) 
+	{
+		const float Xpos = (x * 100 + Location.X) / 100;
+		for (int y = 0; y < Size.Y; ++y) 
+		{
+			const float Ypos = (y * 100 + Location.Y) / 100;
+			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos,Ypos)+1)*Size.Z/24),0,Size.Z)+ZOffset;
+			for (int z = 0; z < Size.Z; z++)
+			{
+				if (z < Height - 3) Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
+				else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
+				else if (z == Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Grass;
+				else if(z == Height && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
+				else Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
+			}
+		}
+	}
+	GenerateTrees(TrunkPositions);
+}
+
+void AChunk::GenerateCompleteMap()
+{
+	TArray<FIntVector> TrunkPositions;
+	FRandomStream Stream = FRandomStream(Seed);
+	const FVector Location = GetActorLocation();
+	for (int x = 0; x < Size.X; ++x)
+	{
+		const float Xpos = (x * 100 + Location.X) / 100;
+		for (int y = 0; y < Size.Y; ++y)
+		{
+			const float Ypos = (y * 100 + Location.Y) / 100;
+			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos,Ypos)+1)*Size.Z/24),0,Size.Z)+ZOffset;
+			for (int z = 0; z < Size.Z; ++z)
+			{
+				const float Zpos = (z * 100 + Location.Z) / 100;
+				const auto Noise3DValue = FastNoise->GetNoise3D(x + Location.X/100, y + Location.Y/100, z + Location.Z/100);
+				if (z < Height - 3)
+				{
+					if (Noise3DValue + HeightNoiseAdjustment->GetFloatValue(static_cast<float>(z)/Height)>= .8f)
+					{
+						Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
+					}
+					else
+					{
+						Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
+					}
+				}
+				else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
+				else if (z == Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Grass;
+				else if(z == Height && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
+				else Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
+			}
+		}
+	}
+	GenerateTrees(TrunkPositions);
 }
 
 bool AChunk::Check(FVector Position) const

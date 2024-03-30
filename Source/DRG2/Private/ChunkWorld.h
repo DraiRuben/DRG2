@@ -37,6 +37,8 @@ public:
 	AChunk* GetClosestChunkInDir(EDirection Direction,FVector ChunkPos);
 	
 	UPROPERTY(EditAnywhere, Category="Chunk World")
+	int ZOffset;
+	UPROPERTY(EditAnywhere, Category="Chunk World")
 	TSubclassOf<AActor> Chunk;
 	UPROPERTY(EditAnywhere, Category="Chunk World")
 	FIntVector DrawDistance;
@@ -55,7 +57,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "ChunkWorld")
 	TArray<UMaterialInterface*> Materials;
 	UPROPERTY(EditAnywhere, Category = "HeightMap")
-	bool Generate3D =false;
+	EGenerationType GenType;
 };
 static FIntVector AdjacentOffset[8] =
 	{
