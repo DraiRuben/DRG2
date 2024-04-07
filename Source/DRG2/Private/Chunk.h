@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ChunkMeshData.h"
 #include "ChunkWorld.h"
+#include "Async/AsyncWork.h"
 #include "Chunk.generated.h"
 
 
@@ -29,7 +30,11 @@ public:
 	int Seed = 1337;
 	int Octave = 3;
 	int ZOffset;
-	
+	float CaveFrequency= 0.03f;
+	float CaveEmptyThreshold = 0.0f;
+	bool MakeWater = false;
+	float MinWaterHeight = 1;
+	float MaxWaterHeight = 1;
 	UPROPERTY(EditDefaultsOnly, Category = "Chunk")
 	UCurveFloat* HeightNoiseAdjustment;
 	UPROPERTY(EditAnywhere, Category = "Chunk")
@@ -46,11 +51,20 @@ public:
 	FIntVector SpawnOffset;
 	
 	void TryGenerateAdjacent(const FVector PlayerPos);
+	virtual void GenerateChunk();
+	void ClearMesh();
+	virtual void GenerateMesh();
+	virtual void GenerateHeightMap3D();
+	virtual void GenerateHeightMap2D();
+	virtual void GenerateCompleteMap();
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere,Category = "Component")
 	TObjectPtr<UProceduralMeshComponent> Mesh;
+	UPROPERTY(EditAnywhere,Category = "Component")
+	TObjectPtr<UProceduralMeshComponent> WaterMesh;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Fast Noise")
 	TObjectPtr<UFastNoiseWrapper> FastNoise;
 	TArray<EBlock> Blocks;
@@ -73,15 +87,9 @@ protected:
 		5,4,1,0,
 		3,2,7,6
 	};
-	UFUNCTION(BlueprintCallable)
-	void ClearMesh();
-	virtual void GenerateChunk();
+	
 	virtual void GenerateTrees(TArray<FIntVector> TrunkPositions);
-	virtual void GenerateMesh();
 	virtual void ApplyMesh();
-	virtual void GenerateHeightMap3D();
-	virtual void GenerateHeightMap2D();
-	virtual void GenerateCompleteMap();
 	virtual bool Check(FVector Position) const;
 	virtual void CreateFace(EDirection Direction, FVector Position, const int MeshMat);
 	virtual void ModifyVoxelData(const FIntVector Position, EBlock Block, const float Radius);
@@ -89,4 +97,17 @@ protected:
 	virtual FVector GetPositionInDirection(EDirection Direction, FVector Position) const;
 	virtual FVector GetNormal(const EDirection Direction) const;
 	virtual int GetBlockIndex(int X, int Y, int Z) const; 
+};
+
+class FAsyncChunkGenerator : public FNonAbandonableTask
+{
+	public :
+		FAsyncChunkGenerator(AChunk* Chunk): Chunk(Chunk){}
+		FORCEINLINE TStatId GetStatId() const
+		{
+			RETURN_QUICK_DECLARE_CYCLE_STAT(FAsyncChunkGenerator, STATGROUP_ThreadPoolAsyncTasks);
+		}
+		void DoWork();
+private:
+	AChunk* Chunk;
 };

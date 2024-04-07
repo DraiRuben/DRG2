@@ -45,13 +45,13 @@ void AOptimisedChunk::GenerateMesh()
 					
 					const bool CurrentBlockEmpty = CurrentBlock == EBlock::Air || CurrentBlock == EBlock::Null;
 					const bool CompareBlockEmpty = CompareBlock == EBlock::Air || CurrentBlock == EBlock::Null;
-					const bool CurrentBlockTransparent = CurrentBlock == EBlock::Leaves;
-					const bool CompareBlockTransparent = CompareBlock == EBlock::Leaves;
+					const bool CurrentBlockTransparent = CurrentBlock == EBlock::Leaves || CurrentBlock == EBlock::Water;
+					const bool CompareBlockTransparent = CompareBlock == EBlock::Leaves || CompareBlock == EBlock::Water;
 					if((CurrentBlockEmpty && CompareBlockEmpty) ||
 						(!CurrentBlockEmpty && !CurrentBlockTransparent && !CompareBlockEmpty && !CompareBlockTransparent))
 					{
 						Mask[N++] = FMask{EBlock::Null, 0};
-					}else if(!CurrentBlockEmpty && (CompareBlockTransparent || CompareBlockEmpty))
+					}else if(!CurrentBlockEmpty && ((CompareBlockTransparent && CurrentBlock != CompareBlock) || CompareBlockEmpty))
 					{
 						Mask[N++] = FMask{CurrentBlock, 1};
 					}else
@@ -171,11 +171,13 @@ void AOptimisedChunk::CreateQuad(
 	}
 
 	ChunkDataPerMat[VoxelType].Normals.Append({
-		Normal,
-		Normal,
-		Normal,
-		Normal
-	});
+        	Normal,
+        	Normal,
+        	Normal,
+        	Normal
+        });
+	
+	
 	const auto Color = FColor(255, 255, 255, static_cast<int>(Mask.Normal));
 	ChunkDataPerMat[VoxelType].Colors.Append({ Color, Color, Color, Color });
 

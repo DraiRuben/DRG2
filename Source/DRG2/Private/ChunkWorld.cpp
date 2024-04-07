@@ -102,14 +102,19 @@ void AChunkWorld::MakeChunk(const int X, const int Y, const int Z)
 	chunk->GenType = GenType;
 	chunk->Seed = Seed;
 	chunk->Frequency = Frequency;
+	chunk->CaveFrequency = CaveFrequency;
 	chunk->Octave = Octaves;
 	chunk->Size = Size;
 	chunk->Materials = Materials;
 	chunk->ZOffset = ZOffset;
 	chunk->SpawnOffset = ChunkSpawnOffset;
+	chunk->CaveEmptyThreshold = CaveEmptyThreshold;
+	chunk->MakeWater = MakeWater;
+	chunk->MinWaterHeight = MinWaterHeight;
+	chunk->MaxWaterHeight = MaxWaterHeight;
 	chunk->Spawner = this;
-	UGameplayStatics::FinishSpawningActor(chunk, transform);
 	GeneratedChunks[GetChunkIndex(X,Y,Z)] = chunk;
+	UGameplayStatics::FinishSpawningActor(chunk, transform);
 }
 
 AChunk* AChunkWorld::MakeChunk(FVector Pos)
@@ -129,14 +134,19 @@ AChunk* AChunkWorld::MakeChunk(FVector Pos)
 	chunk->GenType = GenType;
 	chunk->Seed = Seed;
 	chunk->Frequency = Frequency;
+	chunk->CaveFrequency = CaveFrequency;
 	chunk->Octave = Octaves;
 	chunk->Size = Size;
 	chunk->Materials = Materials;
 	chunk->SpawnOffset = ChunkSpawnOffset;
 	chunk->ZOffset = ZOffset;
+	chunk->CaveEmptyThreshold = CaveEmptyThreshold;
+	chunk->MakeWater = MakeWater;
+	chunk->MinWaterHeight = MinWaterHeight;
+	chunk->MaxWaterHeight = MaxWaterHeight;
 	chunk->Spawner = this;
-	UGameplayStatics::FinishSpawningActor(chunk, transform);
 	GeneratedChunks.Add(chunk);
+	UGameplayStatics::FinishSpawningActor(chunk, transform);
 	return chunk;
 }
 
@@ -148,7 +158,7 @@ AChunk* AChunkWorld::GetClosestChunkInDir(EDirection Direction,FVector ChunkPos)
 		for (auto chunkP : GeneratedChunks)
 		{
 			auto chunkpP = chunkP->GetActorLocation();
-			if(ChunkPos.Z == chunkpP.Z && ChunkPos.Y == chunkpP.Y && ChunkPos.X<chunkpP.X && chunkpP.X-ChunkPos.X < Size.X*100+5)
+			if(ChunkPos.Z == chunkpP.Z && ChunkPos.Y == chunkpP.Y && ChunkPos.X<chunkpP.X && FMath::Abs(chunkpP.X-ChunkPos.X) < Size.X*100+5)
 			{
 				return chunkP;
 			}
@@ -158,7 +168,7 @@ AChunk* AChunkWorld::GetClosestChunkInDir(EDirection Direction,FVector ChunkPos)
 		for (auto chunkP : GeneratedChunks)
 		{
 			auto chunkpP = chunkP->GetActorLocation();
-			if(ChunkPos.Z == chunkpP.Z && ChunkPos.X == chunkpP.X && ChunkPos.Y<chunkpP.Y && chunkpP.Y-ChunkPos.Y < Size.Y*100+5)
+			if(ChunkPos.Z == chunkpP.Z && ChunkPos.X == chunkpP.X && ChunkPos.Y<chunkpP.Y && FMath::Abs(chunkpP.Y-ChunkPos.Y) < Size.Y*100+5)
 			{
 				return chunkP;
 			}
@@ -168,7 +178,7 @@ AChunk* AChunkWorld::GetClosestChunkInDir(EDirection Direction,FVector ChunkPos)
 		for (auto chunkP : GeneratedChunks)
 		{
 			auto chunkpP = chunkP->GetActorLocation();
-			if(ChunkPos.Z == chunkpP.Z && ChunkPos.X == chunkpP.X && ChunkPos.Y>chunkpP.Y && ChunkPos.Y-chunkpP.Y < Size.Y*100+5)
+			if(ChunkPos.Z == chunkpP.Z && ChunkPos.X == chunkpP.X && ChunkPos.Y>chunkpP.Y && FMath::Abs(ChunkPos.Y-chunkpP.Y) < Size.Y*100+5)
 			{
 				return chunkP;
 			}
@@ -178,7 +188,7 @@ AChunk* AChunkWorld::GetClosestChunkInDir(EDirection Direction,FVector ChunkPos)
 		for (auto chunkP : GeneratedChunks)
 		{
 			auto chunkpP = chunkP->GetActorLocation();
-			if(ChunkPos.Z == chunkpP.Z && ChunkPos.Y == chunkpP.Y && ChunkPos.X>chunkpP.X && ChunkPos.X-chunkpP.X < Size.X*100+5)
+			if(ChunkPos.Z == chunkpP.Z && ChunkPos.Y == chunkpP.Y && ChunkPos.X>chunkpP.X && FMath::Abs(ChunkPos.X-chunkpP.X) < Size.X*100+5)
 			{
 				return chunkP;
 			}
@@ -188,7 +198,7 @@ AChunk* AChunkWorld::GetClosestChunkInDir(EDirection Direction,FVector ChunkPos)
 		for (auto chunkP : GeneratedChunks)
 		{
 			auto chunkpP = chunkP->GetActorLocation();
-			if(ChunkPos.X == chunkpP.X && ChunkPos.Y == chunkpP.Y && ChunkPos.Z>chunkpP.Z && ChunkPos.Z-chunkpP.Z < Size.Z*100+5)
+			if(ChunkPos.X == chunkpP.X && ChunkPos.Y == chunkpP.Y && ChunkPos.Z>chunkpP.Z && FMath::Abs(ChunkPos.Z-chunkpP.Z) < Size.Z*100+5)
 			{
 				return chunkP;
 			}
@@ -198,13 +208,15 @@ AChunk* AChunkWorld::GetClosestChunkInDir(EDirection Direction,FVector ChunkPos)
 		for (auto chunkP : GeneratedChunks)
 		{
 			auto chunkpP = chunkP->GetActorLocation();
-			if(ChunkPos.X == chunkpP.X && ChunkPos.Y == chunkpP.Y && ChunkPos.Z<chunkpP.Z && chunkpP.Z-ChunkPos.Z< Size.Z*100+5)
+			if(ChunkPos.X == chunkpP.X && ChunkPos.Y == chunkpP.Y && ChunkPos.Z<chunkpP.Z && FMath::Abs(chunkpP.Z-ChunkPos.Z)< Size.Z*100+5)
 			{
+				UE_LOG(LogTemp,Warning,TEXT("filled"));
 				return chunkP;
 			}
 		}
 		break;
 	}
+	
 	return nullptr;
 }
 
