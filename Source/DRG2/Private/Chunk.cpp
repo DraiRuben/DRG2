@@ -70,15 +70,16 @@ void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
 // Called when the game starts or when spawned
 void AChunk::BeginPlay()
 {
-	Super::BeginPlay();
-	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Cubic,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0,.45f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::CellValue);
 
 	WaterMesh->AttachToComponent(Mesh,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	WaterMesh->SetMobility(EComponentMobility::Static);
 	Blocks.SetNum(Size.X * Size.Y * Size.Z);
+	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Cubic,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0,.45f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::CellValue);
+
 	Mesh->bUseAsyncCooking = true;
 	WaterMesh->bUseAsyncCooking = true;
-	
+	Super::BeginPlay();
+
 	GetWorldTimerManager().SetTimerForNextTick([this]()	{
 		for (int u = 0; u < (GenType == EGenerationType::Gen3D?6:4); u++)
 		{

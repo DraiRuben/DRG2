@@ -10,23 +10,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d2803aa5-71ba-4e9f-aefd-68d313b34ef0" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/BPI_Chunk.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/Water/MPC_Water.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/Water/M_Underwater_PostProcess.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/Water/M_Underwater_PostProcess_Inst.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.DRG2/.idea/.gitignore" beforeDir="false" />
+    <list default="true" id="de62b784-77da-4a7a-b327-b59d9aa4016b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DRG2/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DRG2/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.DRG2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DRG2/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/MapGeneration/BP_Chunk.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MapGeneration/BP_Chunk.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MapGeneration/BP_OptimisedChunk.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MapGeneration/BP_OptimisedChunk.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MapGeneration/Mats/Water/M_Water.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/Water/M_Water.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Player/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Player/BP_Player.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MapGeneration/BP_MarchingChunk.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MapGeneration/BP_MarchingChunk.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MapGeneration/BP_OptimisedChunk.uasset" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Scenes/Map.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Scenes/Map.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DRG2.sln.DotSettings.user" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/DRG2.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/DRG2.Build.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Chunk.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Chunk.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Chunk.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Chunk.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/OptimisedChunk.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/OptimisedChunk.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,82 +28,13 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://5" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
   "customColor": "",
-  "associatedIndex": 1
+  "associatedIndex": 2
 }]]></component>
-  <component name="ProjectId" id="2ep3NNt21BKNmrMSKu9QDgZGGfA" />
+  <component name="ProjectId" id="2epJuHw94BeylIvoKr6x5b488bM" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -256,12 +178,12 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="d2803aa5-71ba-4e9f-aefd-68d313b34ef0" name="Changes" comment="" />
-      <created>1712587652823</created>
+      <changelist id="de62b784-77da-4a7a-b327-b59d9aa4016b" name="Changes" comment="" />
+      <created>1712595808414</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1712587652823</updated>
-      <workItem from="1712587654740" duration="1254000" />
+      <updated>1712595808414</updated>
+      <workItem from="1712595810367" duration="1684000" />
     </task>
     <servers />
   </component>
@@ -270,12 +192,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <watches-manager>
-      <configuration name="CppProject">
-        <watch expression="@ ALREADY PREPROCESSED @FastNoise" />
-      </configuration>
-    </watches-manager>
   </component>
 </project>
