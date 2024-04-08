@@ -8,7 +8,7 @@ public class DRG2 : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","FastNoise","FastNoiseGenerator"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","FastNoiseGenerator","FastNoise"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  "ProceduralMeshComponent"});
 

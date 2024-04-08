@@ -35,9 +35,9 @@ public:
 	bool MakeWater = false;
 	float MinWaterHeight = 1;
 	float MaxWaterHeight = 1;
-	UPROPERTY(EditDefaultsOnly, Category = "Chunk")
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite, Category = "Chunk")
 	UCurveFloat* HeightNoiseAdjustment;
-	UPROPERTY(EditAnywhere, Category = "Chunk")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Chunk")
 	EGenerationType GenType;
 	UPROPERTY(EditAnywhere, Category = "Fast Noise")
 	TArray<TObjectPtr<AChunk>> AdjacentChunks;
@@ -61,12 +61,14 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	UPROPERTY(EditAnywhere,Category = "Component")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "Component")
 	TObjectPtr<UProceduralMeshComponent> Mesh;
-	UPROPERTY(EditAnywhere,Category = "Component")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "Component")
 	TObjectPtr<UProceduralMeshComponent> WaterMesh;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Fast Noise")
 	TObjectPtr<UFastNoiseWrapper> FastNoise;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Component")
+	int WaterLevel = 0;
 	TArray<EBlock> Blocks;
 	int VertexCount = 0;
 	const FVector BlockVertexData[8] = {

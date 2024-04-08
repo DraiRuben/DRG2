@@ -16,11 +16,13 @@ AChunk::AChunk()
 	PrimaryActorTick.bCanEverTick = false;
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>("Mesh");
 	WaterMesh = CreateDefaultSubobject<UProceduralMeshComponent>("WaterMesh");
-	FastNoise = CreateDefaultSubobject<UFastNoiseWrapper>("FastNoiseMaker");
+	FastNoise = CreateDefaultSubobject<UFastNoiseWrapper>(TEXT("FastNoiseMaker"));
+
 	SetRootComponent(Mesh);	
 	Mesh->SetMobility(EComponentMobility::Static);
 
 	AdjacentChunks.SetNum(8);
+
 }
 
 void AChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive)
@@ -68,13 +70,14 @@ void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
 // Called when the game starts or when spawned
 void AChunk::BeginPlay()
 {
+	Super::BeginPlay();
+	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Cubic,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0,.45f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::CellValue);
+
 	WaterMesh->AttachToComponent(Mesh,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	WaterMesh->SetMobility(EComponentMobility::Static);
 	Blocks.SetNum(Size.X * Size.Y * Size.Z);
-	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Cubic,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0,0.45f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::CellValue);
 	Mesh->bUseAsyncCooking = true;
 	WaterMesh->bUseAsyncCooking = true;
-	Super::BeginPlay();
 	
 	GetWorldTimerManager().SetTimerForNextTick([this]()	{
 		for (int u = 0; u < (GenType == EGenerationType::Gen3D?6:4); u++)
@@ -223,7 +226,7 @@ void AChunk::ApplyMesh()
 				ChunkDataPerMat[5].UVData,
 				ChunkDataPerMat[5].Colors,
 				TArray<FProcMeshTangent>(),
-				false);
+				true);
 		WaterMesh->SetMaterial(0,Materials[5]);
 	}
 	for (int i = 0; i < Materials.Num()-1; i++)
@@ -262,8 +265,8 @@ void AChunk::GenerateHeightMap2D()
 {
 	TArray<FIntVector> TrunkPositions;
 	FRandomStream Stream = FRandomStream(GetUniqueID()+Seed);
-	FRandomStream GlobalStream = FRandomStream(Seed+FApp::GetInstanceId().A);
-	int WaterLevel = GlobalStream.RandRange(MinWaterHeight,MaxWaterHeight);
+	FRandomStream GlobalStream = FRandomStream(Seed);
+	WaterLevel = GlobalStream.RandRange(MinWaterHeight,MaxWaterHeight);
 	const auto Location = GetActorLocation();
 	for (int x = 0; x < Size.X; ++x) 
 	{
@@ -301,8 +304,8 @@ void AChunk::GenerateCompleteMap()
 {
 	TArray<FIntVector> TrunkPositions;
 	FRandomStream Stream = FRandomStream(GetUniqueID()+Seed);
-	FRandomStream GlobalStream = FRandomStream(Seed + FApp::GetInstanceId().A);
-	int WaterLevel = GlobalStream.RandRange(MinWaterHeight,MaxWaterHeight);
+	FRandomStream GlobalStream = FRandomStream(Seed);
+	WaterLevel = GlobalStream.RandRange(MinWaterHeight,MaxWaterHeight);
 	const FVector Location = GetActorLocation();
 	const float CaveCoordMultiplier =CaveFrequency/Frequency;
 	for (int x = 0; x < Size.X; ++x)

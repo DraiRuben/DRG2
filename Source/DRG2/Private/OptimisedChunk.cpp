@@ -47,11 +47,12 @@ void AOptimisedChunk::GenerateMesh()
 					const bool CompareBlockEmpty = CompareBlock == EBlock::Air || CurrentBlock == EBlock::Null;
 					const bool CurrentBlockTransparent = CurrentBlock == EBlock::Leaves || CurrentBlock == EBlock::Water;
 					const bool CompareBlockTransparent = CompareBlock == EBlock::Leaves || CompareBlock == EBlock::Water;
-					if((CurrentBlockEmpty && CompareBlockEmpty) ||
-						(!CurrentBlockEmpty && !CurrentBlockTransparent && !CompareBlockEmpty && !CompareBlockTransparent))
+					if((CurrentBlockEmpty && CompareBlockEmpty)
+						||CurrentBlock == CompareBlock
+						||(!CurrentBlockEmpty && !CurrentBlockTransparent && !CompareBlockEmpty && !CompareBlockTransparent))
 					{
 						Mask[N++] = FMask{EBlock::Null, 0};
-					}else if(!CurrentBlockEmpty && ((CompareBlockTransparent && CurrentBlock != CompareBlock) || CompareBlockEmpty))
+					}else if(!CurrentBlockEmpty && (CompareBlockTransparent || CompareBlockEmpty))
 					{
 						Mask[N++] = FMask{CurrentBlock, 1};
 					}else
