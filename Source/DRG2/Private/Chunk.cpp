@@ -147,30 +147,30 @@ void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
 void AChunk::GenerateTrees(TArray<FIntVector> TrunkPositions)
 {
 	FRandomStream Stream = FRandomStream(GetUniqueID()+Seed);
-	for(auto Trunk : TrunkPositions)
+	for(const auto Trunk : TrunkPositions)
 	{
-		int TreeHeight = Stream.RandRange(3,6);
-		int RandX = Stream.RandRange(0,2);
-		int RandY = Stream.RandRange(0,2);
-		int RandZ = Stream.RandRange(0,2);
+		const int TreeHeight = Stream.RandRange(3,6);
+		const int RandX = Stream.RandRange(0,2);
+		const int RandY = Stream.RandRange(0,2);
+		const int RandZ = Stream.RandRange(0,2);
 
-		for(int treeX = -2;treeX<3;treeX++)
+		for(int TreeX = -2;TreeX<3;TreeX++)
 		{
-			for (int treeY = -2; treeY < 3; treeY++)
+			for (int TreeY = -2; TreeY < 3; TreeY++)
 			{
-				for (int treeZ = -2; treeZ < 3; treeZ++)
+				for (int TreeZ = -2; TreeZ < 3; TreeZ++)
 				{
-					if(treeX + Trunk.X>=0 && treeX + Trunk.X<Size.X
-						&&treeY + Trunk.Y>=0 && treeY + Trunk.Y<Size.Y
-						&&treeZ + Trunk.Z>=0 && treeZ + Trunk.Z<Size.Z)
+					if(TreeX + Trunk.X>=0 && TreeX + Trunk.X<Size.X
+						&&TreeY + Trunk.Y>=0 && TreeY + Trunk.Y<Size.Y
+						&&TreeZ + Trunk.Z>=0 && TreeZ + Trunk.Z<Size.Z)
 					{
-						float radius = FVector(treeX* RandX, treeY*RandY, treeZ*RandZ).Size();
+						const float Radius = FVector(TreeX* RandX, TreeY*RandY, TreeZ*RandZ).Size();
 
-						if(radius<=2.8f)
+						if(Radius<=2.8f)
 						{
-							if(Stream.FRand()<0.5f || radius <=1.2f)
+							if(Stream.FRand()<0.5f || Radius <=1.2f)
 							{
-								Blocks[GetBlockIndex(Trunk.X+ treeX,Trunk.Y+treeY,Trunk.Z+treeZ+ TreeHeight)] = EBlock::Leaves;
+								Blocks[GetBlockIndex(Trunk.X+ TreeX,Trunk.Y+TreeY,Trunk.Z+TreeZ+ TreeHeight)] = EBlock::Leaves;
 							}
 						}
 					}
@@ -180,6 +180,42 @@ void AChunk::GenerateTrees(TArray<FIntVector> TrunkPositions)
 		for (int i = 0; i < TreeHeight; i++)
 		{
 			Blocks[GetBlockIndex(Trunk.X,Trunk.Y,Trunk.Z+ i)] = EBlock::Trunk;
+		}
+	}
+}
+
+void AChunk::GenerateMinerals(TArray<FIntVector> OreOrigins)
+{
+	FRandomStream Stream = FRandomStream(GetUniqueID()+Seed+1);
+	for(const auto OreOrigin:OreOrigins)
+	{
+		const int RandX = Stream.RandRange(0,2);
+		const int RandY = Stream.RandRange(0,2);
+		const int RandZ = Stream.RandRange(0,2);
+		const EBlock ChosenOre = static_cast<EBlock>(Stream.RandRange(7,10));
+		for(int OreX = -2;OreX<3;OreX++)
+		{
+			for (int OreY = -2; OreY < 3; OreY++)
+			{
+				for (int OreZ = -2; OreZ < 3; OreZ++)
+				{
+					if(OreX + OreOrigin.X>=0 && OreX + OreOrigin.X<Size.X
+						&&OreY + OreOrigin.Y>=0 && OreY + OreOrigin.Y<Size.Y
+						&&OreZ + OreOrigin.Z>=0 && OreZ + OreOrigin.Z<Size.Z)
+					{
+						const float Radius = FVector(OreX* RandX, OreY*RandY, OreZ*RandZ).Size();
+
+						if(Radius<=2.8f)
+						{
+							const int BlockIndex = GetBlockIndex(OreOrigin.X+ OreX,OreOrigin.Y+OreY,OreOrigin.Z+OreZ);
+							if((Stream.FRand()<0.5f || Radius <=1.2f) && Blocks[BlockIndex] == EBlock::Stone)
+							{
+								Blocks[BlockIndex] = ChosenOre;
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -259,20 +295,21 @@ void AChunk::ApplyMesh()
 	}
 	if(MakeWater)
 	{
+		constexpr int WaterIndex = static_cast<int>(EBlock::Water)-2;
 		WaterMesh->CreateMeshSection(0,
-				ChunkDataPerMat[5].VertexData,
-				ChunkDataPerMat[5].TriangleData,
-				ChunkDataPerMat[5].Normals,
-				ChunkDataPerMat[5].UVData,
-				ChunkDataPerMat[5].Colors,
+				ChunkDataPerMat[WaterIndex].VertexData,
+				ChunkDataPerMat[WaterIndex].TriangleData,
+				ChunkDataPerMat[WaterIndex].Normals,
+				ChunkDataPerMat[WaterIndex].UVData,
+				ChunkDataPerMat[WaterIndex].Colors,
 				TArray<FProcMeshTangent>(),
 				true);
 		WaterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
 		WaterMesh->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
-		WaterMesh->SetMaterial(0,Materials[5]);
+		WaterMesh->SetMaterial(0,Materials[WaterIndex]);
 		WaterMesh->ClearCollisionConvexMeshes();
 		WaterMesh->bUseComplexAsSimpleCollision = false;
-		WaterMesh->AddCollisionConvexMesh(ChunkDataPerMat[5].VertexData);
+		WaterMesh->AddCollisionConvexMesh(ChunkDataPerMat[WaterIndex].VertexData);
 	}
 	for (int i = 0; i < Materials.Num()-1; i++)
 	{
@@ -343,11 +380,13 @@ void AChunk::GenerateHeightMap2D()
 		}
 	}
 	GenerateTrees(TrunkPositions);
+
 }
 
 void AChunk::GenerateCompleteMap()
 {
 	TArray<FIntVector> TrunkPositions;
+	TArray<FIntVector> OrePositions;
 	FRandomStream Stream = FRandomStream(GetUniqueID()+Seed);
 	FRandomStream GlobalStream = FRandomStream(Seed);
 	WaterLevel = GlobalStream.RandRange(MinWaterHeight,MaxWaterHeight);
@@ -374,7 +413,14 @@ void AChunk::GenerateCompleteMap()
 						}
 						else
 						{
-							Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
+							if(Stream.FRand()<0.0005f)
+							{
+								OrePositions.Add(FIntVector(x,y,z));
+							}
+							else
+							{
+								Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
+							}
 						}
 					}
 					else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
@@ -393,7 +439,14 @@ void AChunk::GenerateCompleteMap()
 						}
 						else
 						{
-							Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
+							if(Stream.FRand()<0.0005f)
+							{
+								OrePositions.Add(FIntVector(x,y,z));
+							}
+							else
+							{
+								Blocks[GetBlockIndex(x, y, z)] = EBlock::Stone;
+							}
 						}
 					}
 					else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
@@ -406,6 +459,7 @@ void AChunk::GenerateCompleteMap()
 		}
 	}
 	GenerateTrees(TrunkPositions);
+	GenerateMinerals(OrePositions);
 }
 
 bool AChunk::Check(FVector Position) const

@@ -101,6 +101,7 @@ protected:
 	};
 	
 	virtual void GenerateTrees(TArray<FIntVector> TrunkPositions);
+	virtual void GenerateMinerals(TArray<FIntVector> OreOrigins);
 	virtual void ApplyMesh();
 	virtual bool Check(FVector Position) const;
 	virtual void CreateFace(EDirection Direction, FVector Position, const int MeshMat);

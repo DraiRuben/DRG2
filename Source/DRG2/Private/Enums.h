@@ -12,7 +12,18 @@ static int GetInverseDirection(int Direction)
 UENUM(BlueprintType)
 enum class EBlock : uint8
 {
-	Null, Air, Stone, Dirt, Grass, Trunk, Leaves, Water
+	Null,
+	Air,
+	Stone,
+	Dirt,
+	Grass,
+	Trunk,
+	Leaves,
+	GoldOre,
+	IronOre,
+	DiamondOre,
+	Coal,
+	Water
 };
 
 UENUM(BlueprintType)
