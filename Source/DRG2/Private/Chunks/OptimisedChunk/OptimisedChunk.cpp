@@ -1,7 +1,5 @@
 ﻿#include "OptimisedChunk.h"
-#include "Enums.h"
-#include "FastNoiseWrapper.h"
-
+#include "Chunks/Data/Enums.h"
 AOptimisedChunk::AOptimisedChunk()
 {
 	PrimaryActorTick.bCanEverTick = false;

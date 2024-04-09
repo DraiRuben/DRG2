@@ -1,11 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ChunkMeshData.h"
-#include "ChunkWorld.h"
+#include "Chunks/Data/ChunkMeshData.h"
 #include "Async/AsyncWork.h"
 #include "Chunk.generated.h"
 
@@ -15,7 +12,7 @@ enum class EDirection : uint8;
 enum class EGenerationType:uint8;
 class UFastNoiseWrapper;
 class UProceduralMeshComponent;
-
+class AChunkWorld;
 UCLASS()
 class AChunk : public AActor
 {

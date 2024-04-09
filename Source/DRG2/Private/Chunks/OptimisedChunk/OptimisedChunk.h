@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Chunk.h"
+#include "Chunks/BaseChunk/Chunk.h"
 #include "OptimisedChunk.generated.h"
 UCLASS()
 class AOptimisedChunk: public AChunk

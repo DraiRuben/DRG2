@@ -2,7 +2,8 @@
 
 
 #include "ChunkWorld.h"
-#include "Chunk.h"
+#include "Chunks/BaseChunk/Chunk.h"
+#include "Chunks/Data/Enums.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 // Sets default values

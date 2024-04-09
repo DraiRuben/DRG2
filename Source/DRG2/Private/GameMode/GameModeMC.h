@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "ChunkWorld.h"
+#include "Chunks/Generator/ChunkWorld.h"
 #include "GameModeMC.generated.h"
 
 /**

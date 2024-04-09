@@ -1,8 +1,8 @@
 #include "MarchingChunk.h"
 
-#include "ChunkWorld.h"
-#include "Enums.h"
+#include "Chunks/Generator/ChunkWorld.h"
 #include "FastNoiseWrapper.h"
+#include "Chunks/Data/Enums.h"
 
 void AMarchingChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive)
 {

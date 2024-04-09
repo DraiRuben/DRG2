@@ -2,11 +2,10 @@
 
 
 #include "Chunk.h"
-
-#include "ChunkWorld.h"
-#include "Enums.h"
+#include "Chunks/Data/Enums.h"
+#include "Chunks/Generator/ChunkWorld.h"
 #include "FastNoiseWrapper.h"
-#include "GameModeMC.h"
+#include "GameMode/GameModeMC.h"
 #include "ProceduralMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
