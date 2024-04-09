@@ -8,12 +8,13 @@
 #include "ChunkWorld.generated.h"
 class AChunk;
 
-UCLASS()
+UCLASS(Blueprintable)
 class AChunkWorld : public AActor
 {
 	GENERATED_BODY()
 	
 private:
+	void Setup();
 	void Generate2DMap();
 	void Generate3DMap();
 	void SetAdjacentChunks();
@@ -29,8 +30,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	// Sets default values for this actor's properties
 	AChunkWorld();
 	void MakeChunk(const int X, const int Y, const int Z);
 	AChunk* MakeChunk(FVector Pos);

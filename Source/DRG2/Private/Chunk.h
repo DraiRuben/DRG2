@@ -26,15 +26,20 @@ public:
 	AChunk();
 	TObjectPtr<AChunkWorld> Spawner;
 	FIntVector Size;
-	float Frequency = 0.03f;
+	
 	int Seed = 1337;
 	int Octave = 3;
 	int ZOffset;
+	
 	float CaveFrequency= 0.03f;
 	float CaveEmptyThreshold = 0.0f;
-	bool MakeWater = false;
 	float MinWaterHeight = 1;
 	float MaxWaterHeight = 1;
+	float Frequency = 0.03f;
+	
+	bool MakeWater = false;
+	bool RecursiveSetData = false;
+	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite, Category = "Chunk")
 	UCurveFloat* HeightNoiseAdjustment;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Chunk")
@@ -43,8 +48,11 @@ public:
 	TArray<TObjectPtr<AChunk>> AdjacentChunks;
 	UFUNCTION(BlueprintCallable, Category = "Chunk")
 	virtual void ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive);
-	
-	bool RecursiveSetData = false;
+	UFUNCTION()
+	void OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnWaterEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	TArray<UMaterialInterface*> Materials;
 	TArray<FChunkData>ChunkDataPerMat;
 	TArray<int> VertexCountPerMat;
@@ -71,6 +79,8 @@ protected:
 	int WaterLevel = 0;
 	TArray<EBlock> Blocks;
 	int VertexCount = 0;
+	UMaterialParameterCollection* WaterCollection;
+	UMaterialParameterCollectionInstance* WaterParams;
 	const FVector BlockVertexData[8] = {
 		FVector(100,100,100),
 		FVector(100,0,100),

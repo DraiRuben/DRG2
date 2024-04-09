@@ -6,7 +6,11 @@
 #include "ChunkWorld.h"
 #include "Enums.h"
 #include "FastNoiseWrapper.h"
+#include "GameModeMC.h"
 #include "ProceduralMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
+#include "Materials/MaterialParameterCollection.h"
 
 
 // Sets default values
@@ -15,7 +19,20 @@ AChunk::AChunk()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>("Mesh");
-	WaterMesh = CreateDefaultSubobject<UProceduralMeshComponent>("WaterMesh");
+	const auto GM = Cast<AGameModeMC>(UGameplayStatics::GetGameMode(GetWorld()));
+	if(IsValid(GM) && GM->ChunkGenerator()->MakeWater)
+	{
+		WaterMesh = CreateDefaultSubobject<UProceduralMeshComponent>("WaterMesh");
+		WaterMesh->OnComponentBeginOverlap.AddDynamic(this,&AChunk::OnWaterBeginOverlap);
+		WaterMesh->OnComponentEndOverlap.AddDynamic(this,&AChunk::OnWaterEndOverlap);
+		static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> objectType(TEXT("/Game/MapGeneration/Mats/Water/MPC_Water.MPC_Water"));
+		if (objectType.Succeeded())
+		{
+			WaterCollection = objectType.Object;
+		}
+		WaterParams = GetWorld()->GetParameterCollectionInstance(WaterCollection);
+	}
+
 	FastNoise = CreateDefaultSubobject<UFastNoiseWrapper>(TEXT("FastNoiseMaker"));
 
 	SetRootComponent(Mesh);	
@@ -24,7 +41,42 @@ AChunk::AChunk()
 	AdjacentChunks.SetNum(8);
 
 }
-
+// Called when the game starts or when spawned
+void AChunk::BeginPlay()
+{
+	if(MakeWater)
+	{
+		WaterMesh->AttachToComponent(Mesh,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		WaterMesh->SetMobility(EComponentMobility::Static);
+		WaterMesh->bUseAsyncCooking = true;
+	}
+	Blocks.SetNum(Size.X * Size.Y * Size.Z);
+	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Cubic,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0,.45f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::CellValue);
+	Mesh->bUseAsyncCooking = true;
+	Super::BeginPlay();
+	GetWorldTimerManager().SetTimerForNextTick([this]()	{
+		for (int u = 0; u < (GenType == EGenerationType::Gen3D?6:4); u++)
+		{
+			if(AdjacentChunks[u]!=nullptr)
+			{
+				AdjacentChunks[u]->AdjacentChunks[GetInverseDirection(u)] = this;
+			}
+		}
+	});
+	
+	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask,[&]()
+	{
+		const auto GenTask = new FAsyncTask<FAsyncChunkGenerator>(this);
+		GenTask->StartBackgroundTask();
+		GenTask->EnsureCompletion();
+		delete GenTask;
+		AsyncTask(ENamedThreads::GameThread,[this]()
+		{
+			ApplyMesh();
+		});
+		
+	});
+}
 void AChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const float Radius, const bool Recursive)
 {
 	if (Position.X > Size.X || Position.Y > Size.Y || Position.Z > Size.Z ||Position.X < -1 || Position.Y < -1 || Position.Z < -1)
@@ -36,6 +88,31 @@ void AChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const fl
 	ClearMesh();
 	GenerateMesh();
 	ApplyMesh();
+}
+
+void AChunk::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(OtherActor->ActorHasTag("Player"))
+	{
+		UE_LOG(LogTemp,Warning,TEXT("TEST"));
+		WaterParams->SetScalarParameterValue(TEXT("Water Level"),WaterLevel*100+100);
+		float IsInWater =0;
+		WaterParams->GetScalarParameterValue(TEXT("IsInWater"),IsInWater);
+		WaterParams->SetScalarParameterValue(TEXT("IsInWater"),IsInWater+1);
+	}
+}
+
+void AChunk::OnWaterEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex)
+{
+	if(OtherActor->ActorHasTag("Player"))
+	{
+		UE_LOG(LogTemp,Warning,TEXT("TEST"));
+		float IsInWater =0;
+		WaterParams->GetScalarParameterValue(TEXT("IsInWater"),IsInWater);
+		WaterParams->SetScalarParameterValue(TEXT("IsInWater"),IsInWater-1);
+	}
 }
 
 void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
@@ -65,43 +142,6 @@ void AChunk::TryGenerateAdjacent(const FVector PlayerPos)
 			}
 		}
 	}
-}
-
-// Called when the game starts or when spawned
-void AChunk::BeginPlay()
-{
-
-	WaterMesh->AttachToComponent(Mesh,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	WaterMesh->SetMobility(EComponentMobility::Static);
-	Blocks.SetNum(Size.X * Size.Y * Size.Z);
-	FastNoise->SetupFastNoise(EFastNoise_NoiseType::Cubic,Seed, Frequency,EFastNoise_Interp::Quintic,EFastNoise_FractalType::FBM,Octave,2,0,.45f,EFastNoise_CellularDistanceFunction::Euclidean,EFastNoise_CellularReturnType::CellValue);
-
-	Mesh->bUseAsyncCooking = true;
-	WaterMesh->bUseAsyncCooking = true;
-	Super::BeginPlay();
-
-	GetWorldTimerManager().SetTimerForNextTick([this]()	{
-		for (int u = 0; u < (GenType == EGenerationType::Gen3D?6:4); u++)
-		{
-			if(AdjacentChunks[u]!=nullptr)
-			{
-				AdjacentChunks[u]->AdjacentChunks[GetInverseDirection(u)] = this;
-			}
-		}
-	});
-	
-	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask,[&]()
-	{
-		const auto GenTask = new FAsyncTask<FAsyncChunkGenerator>(this);
-		GenTask->StartBackgroundTask();
-		GenTask->EnsureCompletion();
-		delete GenTask;
-		AsyncTask(ENamedThreads::GameThread,[this]()
-		{
-			ApplyMesh();
-		});
-		
-	});
 }
 
 void AChunk::GenerateTrees(TArray<FIntVector> TrunkPositions)
@@ -146,7 +186,6 @@ void AChunk::GenerateTrees(TArray<FIntVector> TrunkPositions)
 
 void AChunk::GenerateMesh()
 {
-	
 	for (int x = 0; x < Size.X; x++)
 	{
 		for (int y = 0; y < Size.Y; y++)
@@ -228,7 +267,12 @@ void AChunk::ApplyMesh()
 				ChunkDataPerMat[5].Colors,
 				TArray<FProcMeshTangent>(),
 				true);
+		WaterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+		WaterMesh->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
 		WaterMesh->SetMaterial(0,Materials[5]);
+		WaterMesh->ClearCollisionConvexMeshes();
+		WaterMesh->bUseComplexAsSimpleCollision = false;
+		WaterMesh->AddCollisionConvexMesh(ChunkDataPerMat[5].VertexData);
 	}
 	for (int i = 0; i < Materials.Num()-1; i++)
 	{

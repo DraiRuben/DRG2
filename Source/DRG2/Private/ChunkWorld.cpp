@@ -13,6 +13,25 @@ AChunkWorld::AChunkWorld()
 	ChunkCount = 0;
 }
 
+void AChunkWorld::Setup()
+{
+	GeneratedChunks.SetNum(DrawDistance.X*DrawDistance.Y*DrawDistance.Z);
+	GetWorldTimerManager().SetTimer(CheckTimer,this,&AChunkWorld::TryGenerateNewChunks,1.0f,true,1);
+	switch(GenType)
+	{
+	case EGenerationType::Gen2D:
+		Generate2DMap();
+		break;
+	case EGenerationType::Gen3D:
+		Generate3DMap();
+		break;
+	case EGenerationType::GenComplete:
+		Generate3DMap();
+		break;
+	}
+	SetAdjacentChunks();
+}
+
 void AChunkWorld::Generate2DMap()
 {
 	for (int x = 0; x < DrawDistance.X; x++)
@@ -254,20 +273,6 @@ void AChunkWorld::TryGenerateNewChunks()
 void AChunkWorld::BeginPlay()
 {
 	Super::BeginPlay();
-	GeneratedChunks.SetNum(DrawDistance.X*DrawDistance.Y*DrawDistance.Z);
-	GetWorldTimerManager().SetTimer(CheckTimer,this,&AChunkWorld::TryGenerateNewChunks,1.0f,true,7);
-	switch(GenType)
-	{
-	case EGenerationType::Gen2D:
-		Generate2DMap();
-		break;
-	case EGenerationType::Gen3D:
-		Generate3DMap();
-		break;
-	case EGenerationType::GenComplete:
-		Generate3DMap();
-		break;
-	}
-	SetAdjacentChunks();
+	GetWorldTimerManager().SetTimerForNextTick(this,&AChunkWorld::Setup);
 }
 
