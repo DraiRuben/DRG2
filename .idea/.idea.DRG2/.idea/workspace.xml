@@ -11,20 +11,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="de62b784-77da-4a7a-b327-b59d9aa4016b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/Coal/M_CoalMat.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/Coal/coal_ore.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/DiamondOre/M_DiamondOreMat.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/DiamondOre/diamond_ore.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/GoldOre/M_GoldOreMat.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/GoldOre/gold_ore.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/IronOre/M_IronOreMat.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/IronOre/iron_ore.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DRG2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DRG2/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Player/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Player/BP_Player.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Systems/BP_ChunkGenerator.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Systems/BP_ChunkGenerator.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Chunk.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Chunk.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Chunk.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Chunk.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Enums.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Enums.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MapGeneration/Mats/Leaves/M_LeavesMat.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/Leaves/M_LeavesMat.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MapGeneration/Mats/TreeTrunk/spruce_log.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/TreeTrunk/spruce_log.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MapGeneration/Mats/TreeTrunk/spruce_log_top.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/TreeTrunk/spruce_log_top.uasset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -333,7 +323,7 @@
       <workItem from="1712595810367" duration="2024000" />
       <workItem from="1712607756958" duration="693000" />
       <workItem from="1712647894453" duration="4495000" />
-      <workItem from="1712652424795" duration="8170000" />
+      <workItem from="1712652424795" duration="9750000" />
     </task>
     <servers />
   </component>
