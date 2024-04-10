@@ -27,6 +27,7 @@ public:
 	int Seed = 1337;
 	int Octave = 3;
 	int ZOffset;
+	int Amplitude = 16;
 	
 	float CaveFrequency= 0.03f;
 	float CaveEmptyThreshold = 0.0f;
@@ -36,6 +37,7 @@ public:
 	
 	bool MakeWater = false;
 	bool RecursiveSetData = false;
+	bool SplitChunkVertically = false;
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite, Category = "Chunk")
 	UCurveFloat* HeightNoiseAdjustment;

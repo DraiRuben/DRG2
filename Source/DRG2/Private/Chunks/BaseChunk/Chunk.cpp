@@ -83,10 +83,10 @@ void AChunk::ModifyVoxel(const FIntVector Position, const EBlock Block, const fl
 		return;
 	}
 	RecursiveSetData = Recursive;
-	ModifyVoxelData(Position, Block, Radius);
-	ClearMesh();
-	GenerateMesh();
-	ApplyMesh();
+	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask,[this,Position,Block,Radius]
+	{
+		ModifyVoxelData(Position, Block, Radius);
+	});
 }
 
 void AChunk::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -277,7 +277,9 @@ void AChunk::ApplyMesh()
 {
 	//TODO: Use UpdateMeshSection for modify voxel instead
 	Mesh->ClearAllMeshSections();
-	WaterMesh->ClearAllMeshSections();
+	if(WaterMesh)
+		WaterMesh->ClearAllMeshSections();
+	
 	for (int i = 0; i < ChunkDataPerMat.Num()-1; ++i)
 	{
 		if(ChunkDataPerMat[i].VertexData.Num()>0)
@@ -355,7 +357,7 @@ void AChunk::GenerateHeightMap2D()
 		for (int y = 0; y < Size.Y; ++y) 
 		{
 			const float Ypos = (y * 100 + Location.Y) / 100;
-			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos,Ypos)+1)*Size.Z/24),0,Size.Z)+ZOffset;
+			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos,Ypos)+1)*Amplitude),0,Size.Z)+ZOffset;
 			for (int z = 0; z < Size.Z; z++)
 			{
 				if(MakeWater)
@@ -391,19 +393,25 @@ void AChunk::GenerateCompleteMap()
 	WaterLevel = GlobalStream.RandRange(MinWaterHeight,MaxWaterHeight);
 	const FVector Location = GetActorLocation();
 	const float CaveCoordMultiplier =CaveFrequency/Frequency;
+	int SplitZOffset =SplitChunkVertically?static_cast<int>(Location.Z/(100*Size.Z))-ZOffset:0;
 	for (int x = 0; x < Size.X; ++x)
 	{
 		const float Xpos = (x * 100 + Location.X) / 100;
 		for (int y = 0; y < Size.Y; ++y)
 		{
 			const float Ypos = (y * 100 + Location.Y) / 100;
-			const int Height = FMath::Clamp(FMath::RoundToInt((FastNoise->GetNoise2D(Xpos,Ypos)+1)*Size.Z/24),0,Size.Z)+ZOffset;
+			const int Height = FMath::Clamp(FMath::RoundToInt(
+				(FastNoise->GetNoise2D(Xpos,Ypos)+1)*Amplitude),
+				0,
+				Size.Z)
+			+ZOffset;
+			
 			for (int z = 0; z < Size.Z; ++z)
 			{
 				const auto Noise3DValue = FastNoise->GetNoise3D((x + Location.X/100)*CaveCoordMultiplier, (y + Location.Y/100)*CaveCoordMultiplier, (z + Location.Z/100)*CaveCoordMultiplier);
 				if(MakeWater)
 				{
-					if (z < Height - 3)
+					if (z + SplitZOffset < Height - 3)
 					{
 						if (Noise3DValue + HeightNoiseAdjustment->GetFloatValue(
 							static_cast<float>(z) / static_cast<float>(Height)) > CaveEmptyThreshold)
@@ -422,14 +430,14 @@ void AChunk::GenerateCompleteMap()
 							}
 						}
 					}
-					else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
-					else if (z == Height - 1) Blocks[GetBlockIndex(x, y, z)] = z>=WaterLevel?EBlock::Grass:EBlock::Dirt;
-					else if(z == Height && z>WaterLevel && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
+					else if (z + SplitZOffset < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
+					else if (z + SplitZOffset == Height - 1) Blocks[GetBlockIndex(x, y, z)] = z>=WaterLevel?EBlock::Grass:EBlock::Dirt;
+					else if(z + SplitZOffset == Height && z>WaterLevel && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
 					else Blocks[GetBlockIndex(x, y, z)] =z<=WaterLevel?EBlock::Water: EBlock::Air;
 				}
 				else
 				{
-					if (z < Height - 3)
+					if (z + SplitZOffset < Height - 3)
 					{
 						if (Noise3DValue + HeightNoiseAdjustment->GetFloatValue(
 							static_cast<float>(z) / static_cast<float>(Height)) > CaveEmptyThreshold)
@@ -448,9 +456,9 @@ void AChunk::GenerateCompleteMap()
 							}
 						}
 					}
-					else if (z < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
-					else if (z == Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Grass;
-					else if(z == Height && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
+					else if (z + SplitZOffset < Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Dirt;
+					else if (z + SplitZOffset == Height - 1) Blocks[GetBlockIndex(x, y, z)] = EBlock::Grass;
+					else if(z + SplitZOffset == Height && Stream.FRand()<0.01f)TrunkPositions.Add(FIntVector(x,y,z));
 					else Blocks[GetBlockIndex(x, y, z)] = EBlock::Air;
 				}
 				
@@ -517,7 +525,13 @@ void AChunk::ModifyVoxelData(const FIntVector Position, EBlock Block, const floa
 	{
 		return;
 	}
-	Blocks[Index] = Block;	
+	Blocks[Index] = Block;
+	ClearMesh();
+	GenerateMesh();
+	AsyncTask(ENamedThreads::GameThread,[this]()
+	{
+		ApplyMesh();
+	});
 }
 
 TArray<FVector> AChunk::GetFaceVertices(EDirection Direction, FVector Position) const

@@ -67,35 +67,32 @@ void AChunkWorld::SetAdjacentChunks()
 	{
 		for (int y = 0; y < DrawDistance.Y; y++)
 		{
-			if(GenType != EGenerationType::Gen2D)
+			if(GenType == EGenerationType::Gen2D || GenType == EGenerationType::GenComplete && !SplitChunkVertically)
 			{
-				for (int z = 0; z < DrawDistance.Z; z++)
-				{
-					for (int i = 0; i < 6 ; i++)
+				for (int i = 0; i < 4 ; i++)
+				{				
+					const auto OffsetChunkPos = FIntVector(x,y,0) + AdjacentOffset[i];
+					if(IsChunkPosValid(OffsetChunkPos))
 					{
-						
-						const auto OffsetChunkPos = FIntVector(x,y,z) + AdjacentOffset[i];
-						if(IsChunkPosValid(OffsetChunkPos))
-						{
-							if(GeneratedChunks[GetChunkIndex(x,y,z)]!=nullptr)
-							GeneratedChunks[GetChunkIndex(x,y,z)]->AdjacentChunks[i] =
-								GeneratedChunks[GetChunkIndex(OffsetChunkPos.X,OffsetChunkPos.Y,OffsetChunkPos.Z)];
-						}
+						if(GeneratedChunks[GetChunkIndex(x,y,0)]!=nullptr)
+							GeneratedChunks[GetChunkIndex(x,y,0)]->AdjacentChunks[i] =
+								GeneratedChunks[GetChunkIndex(OffsetChunkPos.X,OffsetChunkPos.Y,0)];
+
 					}
-					
 				}
 				continue;
 			}
-
-			for (int i = 0; i < 4 ; i++)
-			{				
-				const auto OffsetChunkPos = FIntVector(x,y,0) + AdjacentOffset[i];
-				if(IsChunkPosValid(OffsetChunkPos))
+			for (int z = 0; z < DrawDistance.Z; z++)
+			{
+				for (int i = 0; i < 6 ; i++)
 				{
-					if(GeneratedChunks[GetChunkIndex(x,y,0)]!=nullptr)
-					GeneratedChunks[GetChunkIndex(x,y,0)]->AdjacentChunks[i] =
-						GeneratedChunks[GetChunkIndex(OffsetChunkPos.X,OffsetChunkPos.Y,0)];
-
+					const auto OffsetChunkPos = FIntVector(x,y,z) + AdjacentOffset[i];
+					if(IsChunkPosValid(OffsetChunkPos))
+					{
+						if(GeneratedChunks[GetChunkIndex(x,y,z)]!=nullptr)
+							GeneratedChunks[GetChunkIndex(x,y,z)]->AdjacentChunks[i] =
+								GeneratedChunks[GetChunkIndex(OffsetChunkPos.X,OffsetChunkPos.Y,OffsetChunkPos.Z)];
+					}
 				}
 			}
 		}
@@ -132,6 +129,8 @@ void AChunkWorld::MakeChunk(const int X, const int Y, const int Z)
 	chunk->MakeWater = MakeWater;
 	chunk->MinWaterHeight = MinWaterHeight;
 	chunk->MaxWaterHeight = MaxWaterHeight;
+	chunk->SplitChunkVertically;
+	chunk->Amplitude = Amplitude;
 	chunk->Spawner = this;
 	GeneratedChunks[GetChunkIndex(X,Y,Z)] = chunk;
 	UGameplayStatics::FinishSpawningActor(chunk, transform);
@@ -164,6 +163,8 @@ AChunk* AChunkWorld::MakeChunk(FVector Pos)
 	chunk->MakeWater = MakeWater;
 	chunk->MinWaterHeight = MinWaterHeight;
 	chunk->MaxWaterHeight = MaxWaterHeight;
+	chunk->SplitChunkVertically;
+	chunk->Amplitude = Amplitude;
 	chunk->Spawner = this;
 	GeneratedChunks.Add(chunk);
 	UGameplayStatics::FinishSpawningActor(chunk, transform);
