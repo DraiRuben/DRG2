@@ -2,6 +2,8 @@
 
 #include "Items/Pickup.h"
 
+#include "PlayerCharacter.h"
+#include "Items/InventoryComponent.h"
 #include "Items/ItemBase.h"
 
 APickup::APickup()
@@ -92,8 +94,35 @@ void APickup::TakePickup(const APlayerCharacter* Taker)
 {
 	if(!IsPendingKillPending() && ItemReference)
 	{
-		//if(UInventoryComponent* PlayerInventory = Taker->GetInventory())
+		if(UInventoryComponent* PlayerInventory = Taker->GetInventory())
+		{
+			const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemReference);
+			switch(AddResult.OperationResult) {
+			case EItemAddResult::IAR_NoItemAdded:
+				break;
+			case EItemAddResult::IAR_PartialAmountAdded:
+				UpdateInteractableData();
+				Taker->UpdateInteractionWidget();
+				break;
+			case EItemAddResult::IAR_AllItemAdded:
+				Destroy();
+				break;
+			}
+
+			UE_LOG(LogTemp, Warning, TEXT("%s"),*AddResult.ResultMessage.ToString());
 		
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Inventory Component Reference is null"));
+
+		}
+		
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Pickup internal item reference is null"));
+
 	}
 }
 

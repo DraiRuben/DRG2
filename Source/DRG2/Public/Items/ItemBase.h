@@ -6,6 +6,7 @@
 #include "Data/ItemData.h"
 #include "ItemBase.generated.h"
 
+class UInventoryComponent;
 /**
  * 
  */
@@ -14,8 +15,8 @@ class DRG2_API UItemBase : public UObject
 {
 	GENERATED_BODY()
 public:
-	//UPROPERTY()
-	//UInventoryComponent* OwningInventory;
+	UPROPERTY()
+	UInventoryComponent* OwningInventory;
 	UPROPERTY(VisibleAnywhere, Category = "Item Data")
 	int32 Quantity;
 	UPROPERTY(EditAnywhere, Category = "Item Data")
@@ -33,6 +34,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Item Data")
 	FItemNumericData NumericData;
 
+
+	bool IsCopy;
+	bool IsPickup;
+	int InventoryPos;
+	
+	void ResetItemFlags();
 	UItemBase();
 	UFUNCTION(Category = "Item")
 	UItemBase* CreateItemCopy() const;

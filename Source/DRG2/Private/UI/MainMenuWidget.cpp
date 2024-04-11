@@ -4,6 +4,8 @@
 #include "UI/MainMenuWidget.h"
 
 #include "PlayerCharacter.h"
+#include "Items/ItemBase.h"
+#include "UI/Inventory/ItemDragDropOperation.h"
 
 void UMainMenuWidget::NativeOnInitialized()
 {
@@ -13,11 +15,17 @@ void UMainMenuWidget::NativeOnInitialized()
 void UMainMenuWidget::NativeConstruct()
 {
 	UUserWidget::NativeConstruct();
-	PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayer());
+	PlayerCharacter = Cast<APlayerCharacter>(GetOwningPlayerPawn());
 }
 
 bool UMainMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent,
 	UDragDropOperation* InOperation)
 {
-	return UUserWidget::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	const UItemDragDropOperation* ItemDragDrop = Cast<UItemDragDropOperation>(InOperation);
+	if(PlayerCharacter && ItemDragDrop->SourceItem)
+	{
+		PlayerCharacter->DropItem(ItemDragDrop->SourceItem,ItemDragDrop->SourceItem->Quantity);
+		return true;
+	}
+	return false;
 }

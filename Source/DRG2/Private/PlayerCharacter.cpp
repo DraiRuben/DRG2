@@ -2,10 +2,11 @@
 
 
 #include "PlayerCharacter.h"
-
+#include "Items/InventoryComponent.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
+#include "Items/Pickup.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "UI/GameHUD.h"
@@ -23,8 +24,12 @@ APlayerCharacter::APlayerCharacter()
 	if(GetWorld())
 		WaterParams = GetWorld()->GetParameterCollectionInstance(WaterCollection);
 
+	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	PlayerInventory->SetSlotsCapacity(37);
 
 }
+
+
 
 // Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -39,6 +44,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	EIC->BindAction(SprintAction, ETriggerEvent::Completed,this,&APlayerCharacter::SprintStop);
 	EIC->BindAction(AttackAction, ETriggerEvent::Started,this,&APlayerCharacter::TryAttack);
 	EIC->BindAction(InteractAction, ETriggerEvent::Started,this,&APlayerCharacter::TryInteract);
+	EIC->BindAction(InventoryAction, ETriggerEvent::Started,this,&APlayerCharacter::ToggleInventory);
 }
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
@@ -102,10 +108,28 @@ void APlayerCharacter::SprintStop(const FInputActionValue& Value)
 
 void APlayerCharacter::TryInteract(const FInputActionValue& Value)
 {
+	BeginInteract();
+	if(!Interacted)
+	{
+		//Try to use item in hotbar's slot
+	}
+	Interacted = false;
 }
 
 void APlayerCharacter::TryAttack(const FInputActionValue& Value)
 {
+}
+
+void APlayerCharacter::ToggleInventory(const FInputActionValue& Value)
+{
+	if(HUD->IsInventoryVisible)
+	{
+		HUD->HideInventory();
+	}
+	else
+	{
+		HUD->ShowInventory();
+	}
 }
 
 void APlayerCharacter::PerformInteractionCheck()
@@ -130,6 +154,32 @@ void APlayerCharacter::PerformInteractionCheck()
 				return;
 			}
 		}
+	}
+	NotInteractableFound();
+}
+
+void APlayerCharacter::UpdateInteractionWidget() const
+{
+	if(IsValid(TargetInteractable.GetObject()))
+	{
+		HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
+	}
+}
+
+void APlayerCharacter::DropItem(UItemBase* ItemToDrop, int32 QuantityToDrop)
+{
+	if(PlayerInventory->FindMatchingItem(ItemToDrop))
+	{
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.Owner = this;
+		SpawnParameters.bNoFail = true;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		const FVector SpawnLocation{GetActorLocation()+GetActorForwardVector()*50.0f};
+		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
+
+		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop,QuantityToDrop);
+		APickup* Pickup = GetWorld()->SpawnActor<APickup>(APickup::StaticClass(),SpawnTransform,SpawnParameters);
+		Pickup->InitializeDrop(ItemToDrop,RemovedQuantity);
 	}
 }
 
@@ -210,6 +260,7 @@ void APlayerCharacter::Interact()
 	{
 		TargetInteractable->Interact(this);
 	}
+	Interacted = true;
 }
 
 

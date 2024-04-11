@@ -6,8 +6,6 @@
 #include "MainMenuWidget.h"
 #include "GameFramework/HUD.h"
 #include "Inventory/InteractionWidget.h"
-#include "Inventory/InventoryPanel.h"
-#include "Items/Interfaces/Interactable.h"
 #include "GameHUD.generated.h"
 
 /**
@@ -19,8 +17,6 @@ class DRG2_API AGameHUD : public AHUD
 	GENERATED_BODY()
 public:
 	AGameHUD();
-	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
-	TSubclassOf<UInventoryPanel> InventoryPanelWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UInteractionWidget> InteractionWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
@@ -35,6 +31,6 @@ public:
 	bool IsInventoryVisible;
 
 private:
-	UInventoryPanel* InventoryPanel;
+	UMainMenuWidget* MainUI;
 	UInteractionWidget* InteractionWidget;
 };

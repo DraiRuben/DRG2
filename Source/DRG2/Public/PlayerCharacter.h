@@ -9,6 +9,8 @@
 #include "Items/Interfaces/Interactable.h"
 #include "PlayerCharacter.generated.h"
 
+class UItemBase;
+class UInventoryComponent;
 class AGameHUD;
 
 UCLASS()
@@ -20,6 +22,11 @@ public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 	bool IsInteracting() const {return GetWorldTimerManager().IsTimerActive(TimerHandle_Interaction);}
+
+	FORCEINLINE UInventoryComponent* GetInventory() const {return PlayerInventory;}
+
+	void UpdateInteractionWidget() const;
+	void DropItem(UItemBase* ItemToDrop, int32 QuantityToDrop);
 public:	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -37,6 +44,8 @@ public:
 	UInputAction* InteractAction;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enhanced Input")
 	UInputAction* AttackAction;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Enhanced Input")
+	UInputAction* InventoryAction;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Movement")
 	float RunSpeed;
@@ -61,7 +70,7 @@ protected:
 	void SprintStop(const FInputActionValue& Value);
 	void TryInteract(const FInputActionValue& Value);
 	void TryAttack(const FInputActionValue& Value);
-
+	void ToggleInventory(const FInputActionValue& Value);
 
 	void PerformInteractionCheck();
 	void FoundInteractable(AActor* NewInteractable);
@@ -80,5 +89,9 @@ protected:
 	UPROPERTY(VisibleAnywhere,Category = "Character | Interaction")
 	TScriptInterface<IInteractable> TargetInteractable;
 
+	UPROPERTY(VisibleAnywhere, Category = "Character | Inventory")
+	UInventoryComponent* PlayerInventory;
 	AGameHUD* HUD;
+
+	bool Interacted;
 };

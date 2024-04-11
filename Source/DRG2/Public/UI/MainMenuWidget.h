@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Inventory/InventoryPanel.h"
 #include "MainMenuWidget.generated.h"
 
 class APlayerCharacter;
@@ -18,7 +19,10 @@ protected:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
 public:
 	UPROPERTY()
 	APlayerCharacter* PlayerCharacter;
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Inventory Widget")
+	UInventoryPanel* InventoryWidget;
 };

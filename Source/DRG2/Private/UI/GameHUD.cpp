@@ -10,11 +10,11 @@ AGameHUD::AGameHUD()
 void AGameHUD::BeginPlay()
 {
 	Super::BeginPlay();
-	if(InventoryPanelWidgetClass)
+	if(MainMenuWidgetClass)
 	{
-		InventoryPanel = CreateWidget<UInventoryPanel>(GetWorld(),InventoryPanelWidgetClass);
-		InventoryPanel->AddToViewport();
-		InventoryPanel->SetVisibility(ESlateVisibility::Collapsed);
+		MainUI = CreateWidget<UMainMenuWidget>(GetWorld(),MainMenuWidgetClass);
+		MainUI->AddToViewport(5);
+		MainUI->SetVisibility(ESlateVisibility::Visible);
 	}
 	if(InteractionWidgetClass)
 	{
@@ -22,29 +22,29 @@ void AGameHUD::BeginPlay()
 		InteractionWidget->AddToViewport(-1);
 		InteractionWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	// if(MainMenuWidgetClass)
-	// {
-	// 	MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(),MainMenuWidgetClass);
-	// 	MainMenuWidget->AddToViewport(5);
-	// 	MainMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
-	// }
 }
 
 void AGameHUD::ShowInventory()
 {
-	if(InventoryPanel)
+	if(MainUI)
 	{
 		IsInventoryVisible = true;
-		InventoryPanel->ShowInventory();
+		MainUI->InventoryWidget->ShowInventory();
+		FInputModeGameAndUI InputMode;
+		GetOwningPlayerController()->SetInputMode(InputMode);
+		GetOwningPlayerController()->SetShowMouseCursor(true);
 	}
 }
 
 void AGameHUD::HideInventory()
 {
-	if(InventoryPanel)
+	if(MainUI)
 	{
 		IsInventoryVisible = false;
-		InventoryPanel->HideInventory();
+		MainUI->InventoryWidget->HideInventory();
+		FInputModeGameOnly InputMode;
+		GetOwningPlayerController()->SetInputMode(InputMode);
+		GetOwningPlayerController()->SetShowMouseCursor(false);
 	}
 }
 
