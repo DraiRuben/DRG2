@@ -99,6 +99,8 @@ void AChunk::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		float IsInWater =0;
 		WaterParams->GetScalarParameterValue(TEXT("IsInWater"),IsInWater);
 		WaterParams->SetScalarParameterValue(TEXT("IsInWater"),IsInWater+1);
+		GEngine->AddOnScreenDebugMessage (-1, 5.f, FColor::Red, FString::Printf(TEXT("Ta mère")));
+
 	}
 }
 
@@ -111,6 +113,8 @@ void AChunk::OnWaterEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		float IsInWater =0;
 		WaterParams->GetScalarParameterValue(TEXT("IsInWater"),IsInWater);
 		WaterParams->SetScalarParameterValue(TEXT("IsInWater"),IsInWater-1);
+		GEngine->AddOnScreenDebugMessage (-1, 5.f, FColor::Blue, FString::Printf(TEXT("La pute")));
+
 	}
 }
 

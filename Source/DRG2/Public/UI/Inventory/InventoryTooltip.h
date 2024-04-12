@@ -16,6 +16,7 @@ class DRG2_API UInventoryTooltip : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY()
 	UInventoryItemSlot* InventorySlotBeingHovered;
 
 	UPROPERTY(meta = (BindWidget))

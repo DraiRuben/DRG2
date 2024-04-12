@@ -104,7 +104,51 @@ FItemAddResult UInventoryComponent::HandleNonStackableItems(UItemBase* InputItem
 
 int32 UInventoryComponent::HandleStackableItems(UItemBase* InputItem, int32 RequestedAddAmount)
 {
-	return 0;
+	if(RequestedAddAmount<=0)
+	{
+		return 0;
+	}
+	int32 AmountToDistribute = RequestedAddAmount;
+	UItemBase* ExistingItem = FindNextPartialStack(InputItem);
+	//Distribute item stack over existing stacks
+	while(ExistingItem)
+	{
+		const int32 AmountToMakeFullStack = CalculateNumberForFullStack(ExistingItem, AmountToDistribute);
+		if(AmountToMakeFullStack>0)
+		{
+			ExistingItem->SetQuantity(ExistingItem->Quantity + AmountToMakeFullStack);
+
+			AmountToDistribute-=AmountToMakeFullStack;
+			InputItem->SetQuantity(AmountToDistribute);
+		}
+		else
+		{
+			if(AmountToDistribute!=RequestedAddAmount)
+			{
+				OnInventoryUpdated.Broadcast();
+				return RequestedAddAmount - AmountToDistribute;
+			}
+			return 0;
+		}
+		if(AmountToDistribute<=0)
+		{
+			OnInventoryUpdated.Broadcast();
+			return RequestedAddAmount;
+		}
+		ExistingItem = FindNextPartialStack(InputItem);
+	}
+	//try to add new stack
+	if(InventoryContents.Num() +1 <=InventorySlotsCapacity)
+	{
+		if(AmountToDistribute>0)
+		{
+			InputItem->SetQuantity(AmountToDistribute);
+			AddNewItem(InputItem->CreateItemCopy(),AmountToDistribute);
+			return RequestedAddAmount;
+		}
+	}
+	OnInventoryUpdated.Broadcast();
+	return RequestedAddAmount - AmountToDistribute;
 }
 
 
@@ -124,7 +168,7 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemBase* InputItem)
 		{
 			return FItemAddResult::AddedAll(InitialRequestedAddAmount, FText::Format(
 				FText::FromString("Successfully added {0} {1} to the inventory."),
-				InitialRequestedAddAmount,
+				StackableAmountAdded,
 				InputItem->DescriptionData.Name));
 		}
 		if(StackableAmountAdded <InitialRequestedAddAmount && StackableAmountAdded >0)

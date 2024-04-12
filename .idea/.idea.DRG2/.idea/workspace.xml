@@ -11,38 +11,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="de62b784-77da-4a7a-b327-b59d9aa4016b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Content/Inputs/IA_Inventory.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/UI/WBP_DragItemVisual.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/UI/WBP_InventoryItemSlot.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/UI/WBP_InventoryTooltip.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Private/Items/InventoryComponent.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Private/UI/Inventory/DragItemVisual.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Private/UI/Inventory/InventoryItemSlot.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Private/UI/Inventory/InventoryTooltip.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Private/UI/Inventory/ItemDragDropOperation.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Public/Items/InventoryComponent.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/DragItemVisual.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/InventoryItemSlot.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/InventoryTooltip.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/ItemDragDropOperation.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Content/ItemData/Blocks/DropCube.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DRG2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DRG2/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Inputs/IMC_InputMap.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Inputs/IMC_InputMap.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/ItemData/DT_Blocks.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ItemData/DT_Blocks.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MapGeneration/Mats/DiamondOre/M_DiamondOreMat.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MapGeneration/Mats/DiamondOre/M_DiamondOreMat.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Misc/BP_PickupBase.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Misc/BP_PickupBase.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Player/BP_Player.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Player/BP_Player.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Scenes/Map.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Scenes/Map.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/UI/WBP_InventoryItemSlot.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/UI/WBP_InventoryItemSlot.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/UI/WBP_InventoryPanel.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/UI/WBP_InventoryPanel.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/UI/WBP_MainMenuWidget.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/UI/WBP_MainMenuWidget.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/DRG2.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/DRG2.Build.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Items/ItemBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Items/ItemBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Chunks/BaseChunk/Chunk.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Chunks/BaseChunk/Chunk.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Items/Interfaces/Interactable.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Items/Interfaces/Interactable.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Items/InventoryComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Items/InventoryComponent.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/Items/Pickup.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/Items/Pickup.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/PlayerCharacter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/PlayerCharacter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/UI/GameHUD.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/UI/GameHUD.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/UI/Inventory/InventoryItemSlot.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/UI/Inventory/InventoryItemSlot.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/UI/Inventory/InventoryPanel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/UI/Inventory/InventoryPanel.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Private/UI/MainMenuWidget.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Private/UI/MainMenuWidget.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/Items/ItemBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/Items/ItemBase.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/Items/Interfaces/Interactable.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/Items/Interfaces/Interactable.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/Items/Pickup.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/Items/Pickup.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/PlayerCharacter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/UI/GameHUD.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/GameHUD.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/InventoryItemSlot.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/InventoryItemSlot.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/InventoryPanel.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/InventoryPanel.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/UI/MainMenuWidget.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/MainMenuWidget.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/InventoryTooltip.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/InventoryTooltip.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/ItemDragDropOperation.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/DRG2/Public/UI/Inventory/ItemDragDropOperation.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +44,48 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///dummy.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -241,7 +274,9 @@
       <workItem from="1712779734333" duration="1170000" />
       <workItem from="1712819984238" duration="7167000" />
       <workItem from="1712827787352" duration="15232000" />
-      <workItem from="1712847208680" duration="638000" />
+      <workItem from="1712847208680" duration="964000" />
+      <workItem from="1712907597290" duration="13548000" />
+      <workItem from="1712926778179" duration="7525000" />
     </task>
     <servers />
   </component>

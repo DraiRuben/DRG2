@@ -9,6 +9,7 @@
 #include "Items/Interfaces/Interactable.h"
 #include "PlayerCharacter.generated.h"
 
+class USphereComponent;
 class UItemBase;
 class UInventoryComponent;
 class AGameHUD;
@@ -72,6 +73,12 @@ protected:
 	void TryAttack(const FInputActionValue& Value);
 	void ToggleInventory(const FInputActionValue& Value);
 
+	UFUNCTION()
+	void OnZoneDetectPickup(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnZoneLosePickup(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	
 	void PerformInteractionCheck();
 	void FoundInteractable(AActor* NewInteractable);
 	void NotInteractableFound();
@@ -88,7 +95,8 @@ protected:
 	FTimerHandle TimerHandle_Interaction;
 	UPROPERTY(VisibleAnywhere,Category = "Character | Interaction")
 	TScriptInterface<IInteractable> TargetInteractable;
-
+	UPROPERTY(VisibleAnywhere,Category = "Character | Interaction")
+	USphereComponent* ItemPickupZone;
 	UPROPERTY(VisibleAnywhere, Category = "Character | Inventory")
 	UInventoryComponent* PlayerInventory;
 	AGameHUD* HUD;

@@ -8,7 +8,7 @@
 
 APickup::APickup()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	PickupMesh = CreateDefaultSubobject<UStaticMeshComponent>("PickupMesh");
 	PickupMesh->SetSimulatePhysics(true);
 	PickupMesh->SetCollisionResponseToAllChannels(ECR_Block);
@@ -21,7 +21,10 @@ void APickup::BeginPlay()
 {
 	Super::BeginPlay();
 	InitializePickup(UItemBase::StaticClass(),ItemQuantity);
+	Tags.Add(FName("Pickup"));
+
 }
+
 void APickup::InitializePickup(const TSubclassOf<UItemBase> BaseClass, const int32 Quantity)
 {
 	if(ItemDataTable && !DesiredItemID.IsNone())
@@ -37,7 +40,7 @@ void APickup::InitializePickup(const TSubclassOf<UItemBase> BaseClass, const int
 		ItemReference->DescriptionData = ItemData->DescriptionData;
 
 		Quantity <=0 ?ItemReference->SetQuantity(1) : ItemReference->SetQuantity(Quantity);
-
+		
 		PickupMesh->SetStaticMesh(ItemData->AssetData.Mesh);
 		PickupMesh->SetMaterial(0,ItemData->AssetData.Material);
 		UpdateInteractableData();
@@ -50,33 +53,50 @@ void APickup::InitializeDrop(UItemBase* ItemToDrop, const int32 Quantity)
 	Quantity <=0 ?ItemReference->SetQuantity(1) : ItemReference->SetQuantity(Quantity);
 	PickupMesh->SetStaticMesh(ItemToDrop->AssetData.Mesh);
 	PickupMesh->SetMaterial(0,ItemToDrop->AssetData.Material);
-
+	ItemReference->OwningInventory = nullptr;
 	UpdateInteractableData();
 }
 
-void APickup::BeginFocus()
+void APickup::BeginInRange(APlayerCharacter* ClosePlayer)
 {
-	IInteractable::BeginFocus();
-	if(PickupMesh)
+	IInteractable::BeginInRange(ClosePlayer);
+	const float DistanceToCurrentClosest = ClosestPlayer? FVector::Dist(ClosestPlayer->GetActorLocation(),GetActorLocation()):999999;
+	const float DistanceToNewPlayer = FVector::Dist(ClosePlayer->GetActorLocation(),GetActorLocation());
+
+	if(DistanceToNewPlayer<DistanceToCurrentClosest)
 	{
-		PickupMesh->SetRenderCustomDepth(true);
+		ClosestPlayer = ClosePlayer;
+		TimeSinceInRangeEntered = 0.0f;
 	}
 }
 
-void APickup::EndFocus()
+void APickup::EndInRange(APlayerCharacter* FarPlayer)
 {
-	IInteractable::EndFocus();
-	if(PickupMesh)
+	IInteractable::EndInRange(FarPlayer);
+	if(ClosestPlayer == FarPlayer)
 	{
-		PickupMesh->SetRenderCustomDepth(false);
+		ClosestPlayer = nullptr;
+		TimeSinceInRangeEntered = 0.0f;
+		PickupMesh->SetEnableGravity(true);
 	}
 }
-
-void APickup::Interact(APlayerCharacter* PlayerCharacter)
+void APickup::Tick(float DeltaSeconds)
 {
-	if(PlayerCharacter)
+	Super::Tick(DeltaSeconds);
+	if(ClosestPlayer)
 	{
-		TakePickup(PlayerCharacter);
+		TimeSinceInRangeEntered+=GetWorld()->DeltaTimeSeconds;
+		if(TimeSinceInRangeEntered>0.5f)
+		{
+			PickupMesh->SetEnableGravity(false);
+			const FVector PickupToPlayerVector = ClosestPlayer->GetActorLocation()-GetActorLocation();
+			const float Distance = PickupToPlayerVector.Size();
+			PickupMesh->AddForce(100*PickupToPlayerVector,NAME_None,true);
+			if(Distance<=50)
+			{
+				TakePickup(ClosestPlayer);
+			}
+		}
 	}
 }
 

@@ -6,6 +6,7 @@
 #include "Blueprint/DragDropOperation.h"
 #include "ItemDragDropOperation.generated.h"
 
+class UInventoryItemSlot;
 class UInventoryComponent;
 class UItemBase;
 /**
@@ -20,4 +21,6 @@ public:
 	UItemBase* SourceItem;
 	UPROPERTY()
 	UInventoryComponent* SourceInventory;
+	UPROPERTY()
+	UInventoryItemSlot* SourceSlot;
 };

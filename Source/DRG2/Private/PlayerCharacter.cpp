@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 #include "Items/InventoryComponent.h"
 #include "EnhancedInputComponent.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "Items/Pickup.h"
@@ -22,11 +23,18 @@ APlayerCharacter::APlayerCharacter()
 		WaterCollection = objectType.Object;
 	}
 	if(GetWorld())
+	{
 		WaterParams = GetWorld()->GetParameterCollectionInstance(WaterCollection);
+	}
 
 	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 	PlayerInventory->SetSlotsCapacity(37);
-
+	ItemPickupZone = CreateDefaultSubobject<USphereComponent>(TEXT("ItemPickupZone"));
+	ItemPickupZone->SetSphereRadius(340.0f);
+	ItemPickupZone->SetCollisionResponseToAllChannels(ECR_Ignore);
+	ItemPickupZone->SetCollisionResponseToChannel(ECC_PhysicsBody,ECR_Overlap);
+	ItemPickupZone->OnComponentBeginOverlap.AddDynamic(this,&APlayerCharacter::OnZoneDetectPickup);
+	ItemPickupZone->OnComponentEndOverlap.AddDynamic(this,&APlayerCharacter::OnZoneLosePickup);
 }
 
 
@@ -52,6 +60,8 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	BaseEyeHeight=90.0f;
 	HUD = Cast<AGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	ItemPickupZone->AttachToComponent(RootComponent,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
@@ -132,6 +142,26 @@ void APlayerCharacter::ToggleInventory(const FInputActionValue& Value)
 	}
 }
 
+void APlayerCharacter::OnZoneDetectPickup(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if(OtherActor->ActorHasTag(FName("Pickup")))
+	{
+		TScriptInterface<IInteractable> PickupInteractableInterface = OtherActor;
+		PickupInteractableInterface->BeginInRange(this);
+	}
+}
+
+void APlayerCharacter::OnZoneLosePickup(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if(OtherActor->ActorHasTag(FName("Pickup")))
+	{
+		TScriptInterface<IInteractable> PickupInteractableInterface = OtherActor;
+		PickupInteractableInterface->EndInRange(this);
+	}
+}
+
 void APlayerCharacter::PerformInteractionCheck()
 {
 	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
@@ -180,6 +210,7 @@ void APlayerCharacter::DropItem(UItemBase* ItemToDrop, int32 QuantityToDrop)
 		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop,QuantityToDrop);
 		APickup* Pickup = GetWorld()->SpawnActor<APickup>(APickup::StaticClass(),SpawnTransform,SpawnParameters);
 		Pickup->InitializeDrop(ItemToDrop,RemovedQuantity);
+		PlayerInventory->OnInventoryUpdated.Broadcast();
 	}
 }
 
@@ -197,7 +228,7 @@ void APlayerCharacter::FoundInteractable(AActor* NewInteractable)
 	InteractionData.CurrentInteractable = NewInteractable;
 	TargetInteractable = NewInteractable;
 
-	HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
+	//HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
 	TargetInteractable->BeginFocus();
 }
 

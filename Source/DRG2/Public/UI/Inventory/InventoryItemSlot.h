@@ -22,6 +22,7 @@ class DRG2_API UInventoryItemSlot : public UUserWidget
 public:
 	FORCEINLINE void SetItemReference(UItemBase* ItemIn){ItemReference = ItemIn;}
 	FORCEINLINE UItemBase* GetItemReference() const {return ItemReference;}
+	void UpdateSlot();
 protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Item Slot")
@@ -30,6 +31,7 @@ protected:
 	TSubclassOf<UInventoryTooltip> ToolTipClass;
 	UPROPERTY(VisibleAnywhere,Category = "Inventory Slot")
 	UItemBase* ItemReference;
+	UPROPERTY()
 	UInventoryTooltip* ToolTipReference;
 	
 	UPROPERTY(VisibleAnywhere,Category = "Inventory Slot",meta = (BindWidget))
@@ -39,7 +41,7 @@ protected:
 	UPROPERTY(VisibleAnywhere,Category = "Inventory Slot",meta = (BindWidget))
 	UTextBlock* ItemQuantity;
 
-	void UpdateSlot();
+
 	
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
@@ -47,4 +49,5 @@ protected:
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+	
 };

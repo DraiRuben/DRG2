@@ -27,6 +27,20 @@ void UInventoryPanel::NativeOnInitialized()
 		{
 			InventoryReference->OnInventoryUpdated.AddUObject(this, &UInventoryPanel::RefreshInventory);
 		}
+		for (int i = 0; i < 8*6; i++)
+		{
+			const auto SlotWidget = CreateWidget<UInventoryItemSlot>(this,InventorySlotClass);
+			const int Row = i/8;
+			const int Column = i%8;
+			if(i<8*5)
+			{
+				InventoryStorage->AddChildToUniformGrid(SlotWidget,Row,Column);
+			}
+			else
+			{
+				HotBar->AddChildToUniformGrid(SlotWidget,0,Column);
+			}
+		}
 	}
 }
 
@@ -35,6 +49,42 @@ bool UInventoryPanel::NativeOnDrop(const FGeometry& InGeometry, const FDragDropE
 {
 	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
+
+int32 UInventoryPanel::GetEmptyCellPos() const
+{
+	TArray<UWidget*> HotbarChildren = InventoryStorage->GetAllChildren();
+	for(int i =0;i<HotbarChildren.Num();i++)
+	{
+		auto CastedHotBarChild = Cast<UInventoryItemSlot>(HotbarChildren[i]);
+		if(!CastedHotBarChild->GetItemReference())
+		{
+			return i;
+		}
+	}
+	TArray<UWidget*> StorageChildren = InventoryStorage->GetAllChildren();
+	for(int i =0;i<StorageChildren.Num();i++)
+	{
+		auto CastedStorageChild = Cast<UInventoryItemSlot>(StorageChildren[i]);
+		if(!CastedStorageChild->GetItemReference())
+		{
+			return i+8;
+		}
+	}
+	return -1;
+}
+
+UWidget* UInventoryPanel::GetSlotAtIndex(const int32 Index) const
+{
+	if(Index<8)
+	{
+		return HotBar->GetChildAt(Index);
+	}
+	else
+	{
+		return InventoryStorage->GetChildAt(Index-8);
+	}
+}
+
 void UInventoryPanel::HideInventory()
 {
 	InventoryStorage->GetParent()->SetVisibility(ESlateVisibility::Hidden);
@@ -48,25 +98,30 @@ void UInventoryPanel::RefreshInventory()
 {
 	if(InventoryReference && InventorySlotClass)
 	{
-		InventoryStorage->ClearChildren();
-		HotBar->ClearChildren();
 		auto InventoryContents = InventoryReference->GetInventoryContents();
+		for(int i =0;i<8*6;i++)
+		{
+			UWidget* SlotWidget = GetSlotAtIndex(i);
+            UInventoryItemSlot* CastedSlot = Cast<UInventoryItemSlot>(SlotWidget);
+			CastedSlot->SetItemReference(nullptr);
+			CastedSlot->UpdateSlot();
+		}
 		for (int i = 0; i < InventoryContents.Num(); i++)
 		{
-			UInventoryItemSlot* ItemSlot = CreateWidget<UInventoryItemSlot>(this,InventorySlotClass);
-			ItemSlot->SetItemReference(InventoryContents[i]);
-			if(i<9*3)
+			UItemBase* Item = InventoryContents[i];
+			UWidget* SlotWidget = GetSlotAtIndex(i);
+			UInventoryItemSlot* CastedSlot = Cast<UInventoryItemSlot>(SlotWidget);
+			if(CastedSlot->GetItemReference() && CastedSlot->GetItemReference() != Item)
 			{
-				int x = i/9;
-				int y = i%9;
-				InventoryStorage->AddChildToUniformGrid(ItemSlot,x,y);
+				const int32 NewCellPos = GetEmptyCellPos();
+				if(NewCellPos>=0)
+				{
+					SlotWidget = GetSlotAtIndex(NewCellPos);
+					CastedSlot = Cast<UInventoryItemSlot>(SlotWidget);
+				}
 			}
-			else
-			{
-				int x = 0;
-				int y = i%9;
-				HotBar->AddChildToUniformGrid(ItemSlot,x,y);
-			}
+			CastedSlot->SetItemReference(Item);
+			CastedSlot->UpdateSlot();
 		}
 	}
 }
@@ -94,7 +149,7 @@ int32 UInventoryPanel::GetMouseDropPositionAsInventorySlotIndex()
 	{
 		int row = Position.Y/100;
 		int column = Position.X/100;
-		return row+column*8;
+		return row*8+column;
 	}
 	return -1;
 

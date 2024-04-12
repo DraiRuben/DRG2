@@ -20,6 +20,15 @@ void IInteractable::EndInteract()
 {
 }
 
+void IInteractable::BeginInRange(APlayerCharacter* ClosePlayer)
+{
+}
+
+
+void IInteractable::EndInRange(APlayerCharacter* FarPlayer)
+{
+}
+
 void IInteractable::Interact(APlayerCharacter* PlayerCharacter)
 {
 }

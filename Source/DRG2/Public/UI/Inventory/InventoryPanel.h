@@ -25,6 +25,8 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeOnInitialized() override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	int32 GetEmptyCellPos() const;
+	UWidget* GetSlotAtIndex(const int32 Index) const;
 public:
 	void HideInventory();
 	void ShowInventory();

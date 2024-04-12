@@ -33,6 +33,7 @@ void UInventoryItemSlot::UpdateSlot()
 		if(ItemReference->NumericData.IsStackable)
 		{
 			ItemQuantity->SetText(FText::AsNumber(ItemReference->Quantity));
+			ItemQuantity->SetVisibility(ESlateVisibility::Visible);
 		}
 		else
 		{
@@ -89,19 +90,43 @@ void UInventoryItemSlot::NativeOnDragDetected(const FGeometry& InGeometry, const
 		UDragItemVisual* DragVisual = CreateWidget<UDragItemVisual>(this,DragItemVisualClass);
 		DragVisual->ItemIcon->SetBrushFromTexture(ItemReference->AssetData.Icon);
 		DragVisual->ItemQuantity->SetText(FText::AsNumber(ItemReference->Quantity));
+		DragVisual->ItemQuantity->SetVisibility(ItemReference->NumericData.IsStackable?
+			ESlateVisibility::Visible:
+			ESlateVisibility::Collapsed);
 
 		UItemDragDropOperation* DragItemOperation = NewObject<UItemDragDropOperation>();
 		DragItemOperation->SourceItem = ItemReference;
 		DragItemOperation->SourceInventory = ItemReference->OwningInventory;
+		DragItemOperation->SourceSlot = this;
 		DragItemOperation->DefaultDragVisual = DragVisual;
 		DragItemOperation->Pivot = EDragPivot::CenterCenter;
 		OutOperation = DragItemOperation;
+
+		ItemIcon->SetVisibility(ESlateVisibility::Collapsed);
+		ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
 bool UInventoryItemSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent,
 	UDragDropOperation* InOperation)
 {
-	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	const UItemDragDropOperation* ItemDragDrop = Cast<UItemDragDropOperation>(InOperation);
+	if(ItemDragDrop->SourceItem && ItemDragDrop->SourceInventory)
+	{
+		if(ItemReference)
+		{
+			Swap(ItemDragDrop->SourceSlot->ItemReference,ItemReference);
+			Swap(ItemDragDrop->SourceSlot->ItemReference->InventoryPos,ItemReference->InventoryPos);
+		}
+		else
+		{
+			ItemReference = ItemDragDrop->SourceItem;
+			ItemDragDrop->SourceSlot->ItemReference = nullptr;
+			ItemDragDrop->SourceSlot->UpdateSlot();
+		}
+		UpdateSlot();
+		return true;
+	}
+	return false;
 }
 

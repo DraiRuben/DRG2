@@ -76,6 +76,8 @@ public:
 	virtual void EndFocus();
 	virtual void BeginInteract();
 	virtual void EndInteract();
+	virtual void BeginInRange(APlayerCharacter* ClosePlayer);
+	virtual void EndInRange(APlayerCharacter* FarPlayer);
 	virtual void Interact(APlayerCharacter* PlayerCharacter);
 
 	FInteractableData InteractableData;

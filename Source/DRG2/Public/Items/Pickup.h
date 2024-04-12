@@ -36,12 +36,14 @@ public:
 
 	FORCEINLINE UItemBase* GetItemData() const {return ItemReference;};
 	
-	virtual void BeginFocus() override;
-	virtual void EndFocus() override;
+	virtual void BeginInRange(APlayerCharacter* ClosePlayer) override;
+	virtual void EndInRange(APlayerCharacter* FarPlayer) override;
 protected:
 	// Called when the game starts or when spawned
+	APlayerCharacter* ClosestPlayer;
+	float TimeSinceInRangeEntered;
 	virtual void BeginPlay() override;
-	virtual void Interact(APlayerCharacter* PlayerCharacter) override;
+	virtual void Tick(float DeltaSeconds) override;
 	void UpdateInteractableData();
 	UFUNCTION()
 	void TakePickup(const APlayerCharacter* Taker);
